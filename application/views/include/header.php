@@ -44,7 +44,7 @@
 <![endif]-->
 
   </head>
-    <body class="hold-transition skin-black-light sidebar-mini" data-base-url="<?php echo base_url(); ?>">
+    <body class="hold-transition skin-black-light sidebar-mini sidebar-collapse" data-base-url="<?php echo base_url(); ?>">
         <div class="wrapper">
 
           <header class="main-header">

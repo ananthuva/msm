@@ -100,8 +100,9 @@ class SSP {
                     $orderBy[] = ($isJoin) ? $column['db'].' '.$dir : '`'.$column['db'].'` '.$dir;
                 }
             }
-
-            $order = 'ORDER BY '.implode(', ', $orderBy);
+            if(!empty($orderBy)){
+                $order = 'ORDER BY '.implode(', ', $orderBy);
+            }
         }
 
         return $order;

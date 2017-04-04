@@ -69,18 +69,18 @@ class User extends CI_Controller {
      * @return Void
      */
 	public function auth_user($page =''){ 
-		$return = $this->User_model->auth_user();
-		if(empty($return)) { 
-			$this->session->set_flashdata('messagePr', 'Invalid details');	
+            $return = $this->User_model->auth_user();
+            if(empty($return)) { 
+                    $this->session->set_flashdata('messagePr', 'Invalid details');	
             redirect( base_url().'user/login', 'refresh');  
-        } else { 
-			if($return == 'not_varified') {
-				$this->session->set_flashdata('messagePr', 'This accout is not varified. Please contact to your admin..');
-                redirect( base_url().'user/login', 'refresh');
-			} else {
-				$this->session->set_userdata('user_details',$return);
-			}
-            redirect( base_url().'user/profile', 'refresh');
+        } else {
+            if ($return == 'not_varified') {
+                $this->session->set_flashdata('messagePr', 'This accout is not varified. Please contact to your admin..');
+                redirect(base_url() . 'user/login', 'refresh');
+            } else {
+                $this->session->set_userdata('user_details', $return);
+            }
+            redirect(base_url() . 'user/profile', 'refresh');
         }
     }
 
@@ -88,46 +88,46 @@ class User extends CI_Controller {
      * This function is used send mail in forget password
      * @return Void
      */
-    public function forgetpassword(){
+    public function forgetpassword() {
         $page['title'] = 'Forgot Password';
-        if($this->input->post()){
+        if ($this->input->post()) {
             $setting = settings();
-            $res = $this->User_model->get_data_by('users', $this->input->post('email'), 'email',1);
-            if(isset($res[0]->users_id) && $res[0]->users_id != '') { 
-                $var_key = $this->getVarificationCode(); 
+            $res = $this->User_model->get_data_by('users', $this->input->post('email'), 'email', 1);
+            if (isset($res[0]->users_id) && $res[0]->users_id != '') {
+                $var_key = $this->getVarificationCode();
                 $this->User_model->updateRow('users', 'users_id', $res[0]->users_id, array('var_key' => $var_key));
                 $sub = "Reset password";
-                $email = $this->input->post('email');      
+                $email = $this->input->post('email');
                 $data = array(
                     'user_name' => $res[0]->name,
-                    'action_url' =>base_url(),
+                    'action_url' => base_url(),
                     'sender_name' => $setting['company_name'],
                     'website_name' => $setting['website'],
-                    'varification_link' => base_url().'user/mail_varify?code='.$var_key,
-                    'url_link' => base_url().'user/mail_varify?code='.$var_key,
-                    );
+                    'varification_link' => base_url() . 'user/mail_varify?code=' . $var_key,
+                    'url_link' => base_url() . 'user/mail_varify?code=' . $var_key,
+                );
                 $body = $this->User_model->get_template('forgot_password');
                 $body = $body->html;
                 foreach ($data as $key => $value) {
-                    $body = str_replace('{var_'.$key.'}', $value, $body);
+                    $body = str_replace('{var_' . $key . '}', $value, $body);
                 }
-                if($setting['mail_setting'] == 'php_mailer') {
-                    $this->load->library("send_mail");         
+                if ($setting['mail_setting'] == 'php_mailer') {
+                    $this->load->library("send_mail");
                     $emm = $this->send_mail->email($sub, $body, $email, $setting);
                 } else {
                     // content-type is required when sending HTML email
                     $headers = "MIME-Version: 1.0" . "\r\n";
                     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-                    $headers .= 'From: '.$setting['EMAIL'] . "\r\n";
-                    $emm = mail($email,$sub,$body,$headers);
+                    $headers .= 'From: ' . $setting['EMAIL'] . "\r\n";
+                    $emm = mail($email, $sub, $body, $headers);
                 }
-                if($emm) {
+                if ($emm) {
                     $this->session->set_flashdata('messagePr', 'To reset your password, link has been sent to your email');
-                    redirect( base_url().'user/login','refresh');
+                    redirect(base_url() . 'user/login', 'refresh');
                 }
-            } else {    
-                $this->session->set_flashdata('forgotpassword', 'This account does not exist');//die;
-                redirect( base_url()."user/forgetpassword");
+            } else {
+                $this->session->set_flashdata('forgotpassword', 'This account does not exist'); //die;
+                redirect(base_url() . "user/forgetpassword");
             }
         } else {
             $this->load->view('include/script');
@@ -197,49 +197,49 @@ class User extends CI_Controller {
      * This function is used to create datatable in users list page
      * @return Void
      */
-    public function dataTable (){
+    public function dataTable() {
         is_login();
-	    $table = 'users';
-    	$primaryKey = 'users_id';
-    	$columns = array(
-           array( 'db' => 'users_id', 'dt' => 0 ),array( 'db' => 'status', 'dt' => 1 ),
-					array( 'db' => 'name', 'dt' => 2 ),
-					array( 'db' => 'email', 'dt' => 3 ),
-					array( 'db' => 'users_id', 'dt' => 4 )
-		);
+        $table = 'users';
+        $primaryKey = 'users_id';
+        $columns = array(
+            array('db' => 'users_id', 'dt' => 0), array('db' => 'status', 'dt' => 1),
+            array('db' => 'name', 'dt' => 2),
+            array('db' => 'email', 'dt' => 3),
+            array('db' => 'users_id', 'dt' => 4)
+        );
 
         $sql_details = array(
-			'user' => $this->db->username,
-			'pass' => $this->db->password,
-			'db'   => $this->db->database,
-			'host' => $this->db->hostname
-		);
-		$where = array("user_type != 'admin'");
-		$output_arr = SSP::complex( $_GET, $sql_details, $table, $primaryKey, $columns, $where);
-		foreach ($output_arr['data'] as $key => $value) {
-			$id = $output_arr['data'][$key][count($output_arr['data'][$key])  - 1];
-			$output_arr['data'][$key][count($output_arr['data'][$key])  - 1] = '';
-			if(CheckPermission($table, "all_update")){
-			$output_arr['data'][$key][count($output_arr['data'][$key])  - 1] .= '<a id="btnEditRow" class="modalButtonUser mClass"  href="javascript:;" type="button" data-src="'.$id.'" title="Edit"><i class="fa fa-pencil" data-id=""></i></a>';
-			}else if(CheckPermission($table, "own_update") && (CheckPermission($table, "all_update")!=true)){
-				$user_id =getRowByTableColomId($table,$id,'users_id','user_id');
-				if($user_id==$this->user_id){
-			$output_arr['data'][$key][count($output_arr['data'][$key])  - 1] .= '<a id="btnEditRow" class="modalButtonUser mClass"  href="javascript:;" type="button" data-src="'.$id.'" title="Edit"><i class="fa fa-pencil" data-id=""></i></a>';
-				}
-			}
-			
-			if(CheckPermission($table, "all_delete")){
-			$output_arr['data'][$key][count($output_arr['data'][$key])  - 1] .= '<a style="cursor:pointer;" data-toggle="modal" class="mClass" onclick="setId('.$id.', \'user\')" data-target="#cnfrm_delete" title="delete"><i class="fa fa-trash-o" ></i></a>';}
-			else if(CheckPermission($table, "own_delete") && (CheckPermission($table, "all_delete")!=true)){
-				$user_id =getRowByTableColomId($table,$id,'users_id','user_id');
-				if($user_id==$this->user_id){
-			$output_arr['data'][$key][count($output_arr['data'][$key])  - 1] .= '<a style="cursor:pointer;" data-toggle="modal" class="mClass" onclick="setId('.$id.', \'user\')" data-target="#cnfrm_delete" title="delete"><i class="fa fa-trash-o" ></i></a>';
-				}
-			}
-            $output_arr['data'][$key][0] = '<input type="checkbox" name="selData" value="'.$output_arr['data'][$key][0].'">';
-		}
-                echo $this->db->last_query();exit;
-		echo json_encode($output_arr);
+            'user' => $this->db->username,
+            'pass' => $this->db->password,
+            'db' => $this->db->database,
+            'host' => $this->db->hostname
+        );
+        $where = array("user_type != 'admin'");
+        $output_arr = SSP::complex($_GET, $sql_details, $table, $primaryKey, $columns, $where);
+        foreach ($output_arr['data'] as $key => $value) {
+            $id = $output_arr['data'][$key][count($output_arr['data'][$key]) - 1];
+            $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] = '';
+            if (CheckPermission($table, "all_update")) {
+                $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a id="btnEditRow" class="modalButtonUser mClass"  href="javascript:;" type="button" data-src="' . $id . '" title="Edit"><i class="fa fa-pencil" data-id=""></i></a>';
+            } else if (CheckPermission($table, "own_update") && (CheckPermission($table, "all_update") != true)) {
+                $user_id = getRowByTableColomId($table, $id, 'users_id', 'user_id');
+                if ($user_id == $this->user_id) {
+                    $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a id="btnEditRow" class="modalButtonUser mClass"  href="javascript:;" type="button" data-src="' . $id . '" title="Edit"><i class="fa fa-pencil" data-id=""></i></a>';
+                }
+            }
+
+            if (CheckPermission($table, "all_delete")) {
+                $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a style="cursor:pointer;" data-toggle="modal" class="mClass" onclick="setId(' . $id . ', \'user\')" data-target="#cnfrm_delete" title="delete"><i class="fa fa-trash-o" ></i></a>';
+            } else if (CheckPermission($table, "own_delete") && (CheckPermission($table, "all_delete") != true)) {
+                $user_id = getRowByTableColomId($table, $id, 'users_id', 'user_id');
+                if ($user_id == $this->user_id) {
+                    $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a style="cursor:pointer;" data-toggle="modal" class="mClass" onclick="setId(' . $id . ', \'user\')" data-target="#cnfrm_delete" title="delete"><i class="fa fa-trash-o" ></i></a>';
+                }
+            }
+            $output_arr['data'][$key][0] = '<input type="checkbox" name="selData" value="' . $output_arr['data'][$key][0] . '">';
+        }
+        
+        echo json_encode($output_arr);
     }
 
     /**
@@ -447,55 +447,56 @@ class User extends CI_Controller {
      */
     public function InvitePeople() {
         is_login();
-    	if($this->input->post('emails')){
+        if ($this->input->post('emails')) {
             $setting = settings();
-			$var_key = $this->randomString();
-    		$emailArray = explode(',', $this->input->post('emails'));
-    		$emailArray = array_map('trim', $emailArray);
-    		$body = $this->User_model->get_template('invitation');
+            $var_key = $this->randomString();
+            $emailArray = explode(',', $this->input->post('emails'));
+            $emailArray = array_map('trim', $emailArray);
+            $body = $this->User_model->get_template('invitation');
             $result['existCount'] = 0;
             $result['seccessCount'] = 0;
             $result['invalidEmailCount'] = 0;
             $result['noTemplate'] = 0;
-    		if(isset($body->html) && $body->html != '') {
+            if (isset($body->html) && $body->html != '') {
                 $body = $body->html;
-	    		foreach ($emailArray as $mailKey => $mailValue) {
-	    			if(filter_var($mailValue, FILTER_VALIDATE_EMAIL)) {
-	    				$res = $this->User_model->get_data_by('users', $mailValue, 'email');
-	    				if(is_array($res) && empty($res)) {
-			    			$link = (string) '<a href="'.base_url().'user/registration?invited='.$var_key.'">Click here</a>';
-			    			$data = array('var_user_email' => $mailValue, 'var_inviation_link' => $link);
-    				        foreach ($data as $key => $value) {
-    				          $body = str_replace('{'.$key.'}', $value, $body);
-    				        }
-                            if($setting['mail_setting'] == 'php_mailer') {
+                foreach ($emailArray as $mailKey => $mailValue) {
+                    if (filter_var($mailValue, FILTER_VALIDATE_EMAIL)) {
+                        $res = $this->User_model->get_data_by('users', $mailValue, 'email');
+                        if (is_array($res) && empty($res)) {
+                            $link = (string) '<a href="' . base_url() . 'user/registration?invited=' . $var_key . '">Click here</a>';
+                            $data = array('var_user_email' => $mailValue, 'var_inviation_link' => $link);
+                            foreach ($data as $key => $value) {
+                                $body = str_replace('{' . $key . '}', $value, $body);
+                            }
+                            if ($setting['mail_setting'] == 'php_mailer') {
                                 $this->load->library("send_mail");
-    			    			$emm = $this->send_mail->email('Invitation for registration', $body, $mailValue, $setting);
+                                $emm = $this->send_mail->email('Invitation for registration', $body, $mailValue, $setting);
                             } else {
                                 // content-type is required when sending HTML email
                                 $headers = "MIME-Version: 1.0" . "\r\n";
                                 $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-                                $headers .= 'From: '.$setting['EMAIL'] . "\r\n";
-                                $emm = mail($mailValue,'Invitation for registration',$body,$headers);
+                                $headers .= 'From: ' . $setting['EMAIL'] . "\r\n";
+                                $emm = mail($mailValue, 'Invitation for registration', $body, $headers);
                             }
-			    			if($emm) {
-			    				$darr = array('email' => $mailValue, 'var_key' => $var_key);
-			    				$this->User_model->insertRow('users', $darr);
-			    				$result['seccessCount'] += 1;;
-			    			}
-	    				} else {
-	    					$result['existCount'] += 1;
-	    				}
-	    			} else {
-	    				$result['invalidEmailCount'] += 1;
-	    			}
-	    		}
-    		} else {
-    			$result['noTemplate'] = 'No Email Template Availabale.';
-    		}
-    	}
-    	echo json_encode($result);
-    	exit;
+                            if ($emm) {
+                                $darr = array('email' => $mailValue, 'var_key' => $var_key);
+                                $this->User_model->insertRow('users', $darr);
+                                $result['seccessCount'] += 1;
+                                ;
+                            }
+                        } else {
+                            $result['existCount'] += 1;
+                        }
+                    } else {
+                        $result['invalidEmailCount'] += 1;
+                    }
+                }
+            } else {
+                $result['noTemplate'] = 'No Email Template Availabale.';
+            }
+        }
+        echo json_encode($result);
+        exit;
     }
 
     /**
