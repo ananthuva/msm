@@ -84,18 +84,22 @@ CREATE TABLE `users` (
   `status` varchar(255) DEFAULT NULL,
   `is_deleted` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `lname` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `mobile_no` varchar(255) DEFAULT NULL,
+  `phone_no` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
+  `address` text,
   `profile_pic` varchar(255) DEFAULT NULL,
   `user_type` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`users_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 /*Data for the table `users` */
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`users_id`,`user_id`,`var_key`,`status`,`is_deleted`,`name`,`password`,`email`,`profile_pic`,`user_type`) values (1,'1','','active','0','admin','$2y$10$/R/ys6rRs86DEiwzDp1kU.2Ix7Hpr8cTyyBDuIpL80YdMXegi7cMW','ava007jb@gmail.com','demo_pic.png','admin'),(2,'1',NULL,'active','0','manager','$2y$10$0.pVMGrmUNad52skOf3jauzGMBAhr7WoJda53V6WTcgURmZzrJV.2','asd@wer.com','user.png','MANAGER');
+insert  into `users`(`users_id`,`user_id`,`var_key`,`status`,`is_deleted`,`name`,`lname`,`password`,`mobile_no`,`phone_no`,`email`,`address`,`profile_pic`,`user_type`) values (1,'1','','active','0','admin',NULL,'$2y$10$/R/ys6rRs86DEiwzDp1kU.2Ix7Hpr8cTyyBDuIpL80YdMXegi7cMW',NULL,NULL,'ava007jb@gmail.com',NULL,'demo_pic.png','admin'),(2,'1',NULL,'active','0','manager',NULL,'$2y$10$0.pVMGrmUNad52skOf3jauzGMBAhr7WoJda53V6WTcgURmZzrJV.2',NULL,NULL,'asd@wer.com',NULL,'user.png','MANAGER'),(3,'1',NULL,'active','0','','','$2y$10$UdSAHorRaT262fiY66oY8usasj6STVZp0H0bSYv5hzDh7G9JaCoAi','','','','','user.png','Member'),(4,'1',NULL,'active','0','7546','456456456','$2y$10$/R/ys6rRs86DEiwzDp1kU.2Ix7Hpr8cTyyBDuIpL80YdMXegi7cMW','456456','456456456','456456','456456456','user.png','Member'),(5,'1',NULL,'active','0','444','456456456','$2y$10$/GJvwhf7spXJVhzwIGmIaeIPnxo/GGgHJZQ3pG.yzJXBEgnI15Um6','4564568','456456456','admin','66565','user.png','Member'),(6,'1',NULL,'active','0','1','2','$2y$10$0zGU6hCHEQMUi7h/eWRLIOD6xpA/ZSByLAHcWHRajlpTSUyiziBpS','rrrr','1231231','admin@admin.com','4124532','user.png','Member');
 
 UNLOCK TABLES;
 
