@@ -347,7 +347,7 @@ class User extends CI_Controller {
             $this->form_validation->set_rules('password', 'Password', 'trim|required');
         }
         if ($this->form_validation->run() === TRUE) {
-            $this->input->post('mobile_no') = '+91'.$this->input->post('mobile_no');
+            $_POST['mobile_no'] = '+91'.$_POST['mobile_no'];
             if ($id != '') {
                 $data = $this->input->post();
                 if ($this->input->post('status') != '') {
