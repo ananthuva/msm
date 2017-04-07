@@ -11,8 +11,18 @@ class User_model extends CI_Model {
     function auth_user() {
         $email = $this->input->post('email');
         $password = $this->input->post('password');
-        $this->db->where("is_deleted='0' AND (name='$email' OR email='$email')");
+        $this->db->where("is_deleted='0' AND (email='$email')");
         $result = $this->db->get('users')->result();
+        if(empty($result)){
+            if (substr($email, 0, 3) == '+91') {
+                $email = substr($email, 3);
+            } elseif (substr($email, 0, 2) == '91') {
+                $email = substr($email, 2);
+            }
+            $email = '+91'.$email;
+            $this->db->where("is_deleted='0' AND (mobile_no='$email')");
+            $result = $this->db->get('users')->result();
+        }
         if (!empty($result)) {
             if (password_verify($password, $result[0]->password)) {
                 if ($result[0]->status != 'active') {

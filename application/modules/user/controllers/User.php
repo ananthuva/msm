@@ -430,12 +430,12 @@ class User extends CI_Controller {
                     redirect( base_url().'user/'.$redirect, 'refresh');
                 } else {
                     $this->session->set_flashdata('messagePr', 'You Don\'t have this autherity ');
-                    redirect(base_url() . 'user/registration', 'refresh');
+                    redirect(base_url() . 'user/'.$redirect, 'refresh');
                 }
             }
         }
         $this->session->set_flashdata('messagePr', validation_errors());
-        redirect( base_url().'user/userTable', 'refresh');
+        redirect( base_url().'user/'.$redirect, 'refresh');
     }
 
     /**
