@@ -578,3 +578,14 @@ th.showRolesPermission {
     padding: 7px 0px 0px 7px;
     background-color: #edeef2;
 }
+.form-control-element {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	z-index: 2;
+	display: block;
+	width: 100px;
+	height: 34px;
+	line-height: 21px;
+	text-align: center;
+}

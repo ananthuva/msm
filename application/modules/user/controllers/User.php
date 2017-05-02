@@ -170,6 +170,59 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/login', 'refresh');
         }
     }
+    
+    /**
+     * This function is used to verify user mobile number
+     * @return : void
+     */
+    public function verifyMobileNumber($user_id) {
+        $otp = $this->getOTP();
+        if ($otp) {
+            $this->User_model->updateRow('users', 'users_id', $user_id, array('var_otp' => $otp));
+            return $user_id;
+        } else {
+            $this->session->set_flashdata('messagePr', 'Unable to perform this action');
+            redirect(base_url() . 'user/login', 'refresh');
+        }
+    }
+    
+    /**
+     * This function is used to send OTP to registered mobiles
+     * @return : void
+     */
+    public function sendOTPtoMobile() {
+        $mobileNumber = "8129293159";
+        $message = urlencode("Test message");
+
+        //Prepare you post parameters
+        $postData = array(
+            'mobiles' => $mobileNumber,
+            'message' => $message,
+            'sender' => 'MED-REGISTER',
+            'route' => 4
+        );
+        $url = "https://control.msg91.com/api/v2/sendsms";
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "$url",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => $postData,
+            CURLOPT_HTTPHEADER => array(
+                "authkey:150795AKEnh1ZS5906a523",
+                "content-type: multipart/form-data"
+            ),
+        ));
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        curl_close($curl);
+
+        if ($err) {
+            echo "cURL Error #:" . $err;
+        } else {
+            echo $response;
+        }
+    }
 
     /**
      * This function is generate hash code for random string
@@ -178,6 +231,15 @@ class User extends CI_Controller {
     public function getVarificationCode() {
         $pw = $this->randomString();
         return $varificat_key = password_hash($pw, PASSWORD_DEFAULT);
+    }
+    
+    /**
+     * This function is generate 4 digit random number
+     * @return string
+     */
+    public function getOTP() {
+        $otp = mt_rand(1000, 9999);
+        return $otp;
     }
 
     /**
@@ -314,7 +376,7 @@ class User extends CI_Controller {
                 $redirect = 'userTable';
             }
         } else {
-            $redirect = 'login';
+            $redirect = 'registration';
         }
         if ($this->input->post('fileOld')) {
             $newname = $this->input->post('fileOld');
@@ -339,8 +401,8 @@ class User extends CI_Controller {
                 }
             }
         }
-        $this->form_validation->set_rules('address', 'Address', 'trim|required');    
-        $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');   
+        $this->form_validation->set_rules('address', 'Address', 'trim');    
+        $this->form_validation->set_rules('email', 'Email', 'trim|valid_email');   
         $this->form_validation->set_rules('mobile_no', 'Mobile Number', 'trim|numeric|exact_length[10]');    
         $this->form_validation->set_rules('name', 'First Name', 'trim|required');
         if ($id != '') {
@@ -427,6 +489,11 @@ class User extends CI_Controller {
                     }
                     unset($data['submit']);
                     $this->User_model->insertRow('users', $data);
+                    $success = 'Successfully Registered..';
+                    if($redirect == 'registration'){
+                        $success .='<a href ="'.base_url().'user/login">Goto login page</a>';
+                    }
+                    $this->session->set_flashdata('messagePr', $success);
                     redirect( base_url().'user/'.$redirect, 'refresh');
                 } else {
                     $this->session->set_flashdata('messagePr', 'You Don\'t have this autherity ');
