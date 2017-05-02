@@ -6,7 +6,7 @@
 <body class="hold-transition register-page" style="margin-top: -50px;">
     <div class="register-box">
         <div class="register-logo">
-            <a href="<?php echo base_url(); ?>"><b>User Registration</b></a>
+            <a href="<?php echo base_url(); ?>"><b>Verify Mobile Number</b></a>
         </div>
         <div class="register-box-body">
             <p class="login-box-msg">Register a new membership</p>
@@ -33,8 +33,9 @@
                 </div>
                 
                 <div class="form-group has-feedback">
-                    <input type="text" id ="mobile_no" name="mobile_no" data-validation="required" class="form-control" placeholder="Mobile Number">
-                    <span class="glyphicon glyphicon-earphone form-control-feedback"></span>
+                    <input type="text" name="mobile_no" data-validation="required" class="form-control" placeholder="Mobile Number" style="width: 65%;">
+                    <span class="glyphicon glyphicon-earphone form-control-feedback" style="left: 52%;"></span>
+                    <button type="button" style="width: 30%;" id="rolesAdd" class="btn btn-success form-control-element">Add</button>
                 </div>
 
                 <div class="form-group has-feedback">
@@ -57,6 +58,7 @@
                     ?>
                     </select>-->
                     <input type="hidden" name="user_type" class="form-control" value="Member"> 
+                    <input type="hidden" name="is_verified" class="form-control" value="0"> 
                     <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
                 </div>
                 <div class="row">
@@ -95,5 +97,20 @@
                 }
             });
 <?php } ?>
+    $('#verify_mobile').on('click',function(){
+        var ph_number = $('#mobile_no').val();
+        if (/^\d{10}$/.test(ph_number)) {
+           $.ajax({
+                url: '<?php echo base_url('user/sendOTPtoMobile'); ?>',
+                type: 'POST',
+                data: "mobile_number=" + ph_number,
+                success: function(data) {
+                    console.log(data);
+                }
+            });
+        } else {
+            alert('Invalid Mobile Number');
+        }
+    });
     });
 </script>

@@ -66,6 +66,25 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/login', 'refresh');
         }
     }
+    
+    /**
+     * This function is used to authentify user
+     * @return Void
+     */
+    public function authentify() {
+        if (isset($_SESSION['user_details'])) {
+            redirect(base_url() . 'user/profile', 'refresh');
+        }
+        //Check if admin allow to registration for user
+        if (setting_all('register_allowed') == 1) {
+            $data = array('title' => 'Authentification');
+            $this->load->view('include/script', $data);
+            $this->load->view('authentify');
+        } else {
+            $this->session->set_flashdata('messagePr', 'Registration Not allowed..');
+            redirect(base_url() . 'user/login', 'refresh');
+        }
+    }
 
     /**
      * This function is used for user authentication ( Working in login process )
@@ -191,8 +210,9 @@ class User extends CI_Controller {
      * @return : void
      */
     public function sendOTPtoMobile() {
-        $mobileNumber = "8129293159";
-        $message = urlencode("Test message");
+        $mobileNumber = $_POST['mobile_number'];
+        $otp = $this->getOTP();
+        $message = urlencode($otp. " is your verification code");
 
         //Prepare you post parameters
         $postData = array(
@@ -216,12 +236,13 @@ class User extends CI_Controller {
         $response = curl_exec($curl);
         $err = curl_error($curl);
         curl_close($curl);
-
+        $result = array();
         if ($err) {
-            echo "cURL Error #:" . $err;
+           $result['error'] = "cURL Error #:" . $err;
         } else {
-            echo $response;
+           $result['success'] = $otp;
         }
+        echo json_encode($result); 
     }
 
     /**
@@ -491,10 +512,12 @@ class User extends CI_Controller {
                     $this->User_model->insertRow('users', $data);
                     $success = 'Successfully Registered..';
                     if($redirect == 'registration'){
-                        $success .='<a href ="'.base_url().'user/login">Goto login page</a>';
+                        $this->authentify();
+                        //redirect( base_url().'user/authentify', 'refresh');
+                    }else {
+                        $this->session->set_flashdata('messagePr', $success);
+                        redirect( base_url().'user/'.$redirect, 'refresh');
                     }
-                    $this->session->set_flashdata('messagePr', $success);
-                    redirect( base_url().'user/'.$redirect, 'refresh');
                 } else {
                     $this->session->set_flashdata('messagePr', 'You Don\'t have this autherity ');
                     redirect(base_url() . 'user/'.$redirect, 'refresh');
