@@ -71,15 +71,20 @@ class User extends CI_Controller {
      * This function is used to authentify user
      * @return Void
      */
-    public function authentify() {
+    public function authentify($user_id = '') {
+        if(empty($user_id)){
+            redirect(base_url() . 'user/login', 'refresh');
+        }
         if (isset($_SESSION['user_details'])) {
             redirect(base_url() . 'user/profile', 'refresh');
         }
         //Check if admin allow to registration for user
         if (setting_all('register_allowed') == 1) {
             $data = array('title' => 'Authentification');
+            $mobile_number = $this->User_model->get_mobile_number($user_id);
+            $mobile_number['user_id'] = $user_id;
             $this->load->view('include/script', $data);
-            $this->load->view('authentify');
+            $this->load->view('authentify',$mobile_number);
         } else {
             $this->session->set_flashdata('messagePr', 'Registration Not allowed..');
             redirect(base_url() . 'user/login', 'refresh');
@@ -99,6 +104,8 @@ class User extends CI_Controller {
             if ($return == 'not_varified') {
                 $this->session->set_flashdata('messagePr', 'This accout is not varified. Please contact to your admin..');
                 redirect(base_url() . 'user/login', 'refresh');
+            } else if(isset($return['number_not_varified']) && !empty($return['number_not_varified'])){ 
+                redirect(base_url() . 'user/authentify/'.$return['number_not_varified'], 'refresh');
             } else {
                 $this->session->set_userdata('user_details', $return);
             }
@@ -194,14 +201,19 @@ class User extends CI_Controller {
      * This function is used to verify user mobile number
      * @return : void
      */
-    public function verifyMobileNumber($user_id) {
-        $otp = $this->getOTP();
-        if ($otp) {
-            $this->User_model->updateRow('users', 'users_id', $user_id, array('var_otp' => $otp));
-            return $user_id;
-        } else {
-            $this->session->set_flashdata('messagePr', 'Unable to perform this action');
+    public function verifyMobileNumber() {
+        $otp = $this->input->post('otp_confirmation');
+        $user_id = $this->input->post('user_id');
+        $res = $this->User_model->verifyMobileNumber($otp, $user_id);
+        if (!empty($res)) {
+            $this->User_model->updateRow('users', 'users_id', $user_id, array('is_verified' => 1));
+            $this->User_model->updateRow('users', 'users_id', $user_id, array('mobile_no' => $this->input->post('mobile_no')));
+            $flash = 'Mobile number Verified';
+            $this->session->set_flashdata('messagePr', $flash);
             redirect(base_url() . 'user/login', 'refresh');
+        } else {
+            $this->session->set_flashdata('messagePr', 'Invalid OTP. Please try again');
+            redirect(base_url() . 'user/authentify/'.$user_id, 'refresh');
         }
     }
     
@@ -210,8 +222,10 @@ class User extends CI_Controller {
      * @return : void
      */
     public function sendOTPtoMobile() {
-        $mobileNumber = $_POST['mobile_number'];
+        $mobileNumber = $this->input->post('mobile_number');
+        $user_id = $this->input->post('user_id');
         $otp = $this->getOTP();
+        $this->User_model->updateRow('users', 'users_id', $user_id, array('var_otp' => $otp));
         $message = urlencode($otp. " is your verification code");
 
         //Prepare you post parameters
@@ -509,11 +523,10 @@ class User extends CI_Controller {
                         unset($data['call_from']);
                     }
                     unset($data['submit']);
-                    $this->User_model->insertRow('users', $data);
+                    $users_id = $this->User_model->insertRow('users', $data);
                     $success = 'Successfully Registered..';
                     if($redirect == 'registration'){
-                        $this->authentify();
-                        //redirect( base_url().'user/authentify', 'refresh');
+                        redirect( base_url().'user/authentify/'.$users_id, 'refresh');
                     }else {
                         $this->session->set_flashdata('messagePr', $success);
                         redirect( base_url().'user/'.$redirect, 'refresh');

@@ -27,6 +27,8 @@ class User_model extends CI_Model {
             if (password_verify($password, $result[0]->password)) {
                 if ($result[0]->status != 'active') {
                     return 'not_varified';
+                } else if ($result[0]->is_verified != 1){
+                    return array('number_not_varified'=>$result[0]->users_id);
                 }
                 return $result;
             } else {
@@ -79,12 +81,24 @@ class User_model extends CI_Model {
     /**
      * This function is used to select data form table  
      */
-    function get_data_by($tableName = '', $value = '', $colum = '', $condition = '') {
+    function get_data_by($tableName = '', $value = '', $colum = '') {
         if ((!empty($value)) && (!empty($colum))) {
             $this->db->where($colum, $value);
         }
         $this->db->select('*');
         $this->db->from($tableName);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    /**
+     * This function is used to verify mobile number from otp  
+     */
+    function verifyMobileNumber($otp, $user_id) {
+        $this->db->where('users_id', $user_id);
+        $this->db->where('var_otp', $otp);
+        $this->db->where('is_verified', 0);
+        $this->db->select('*');
+        $this->db->from('users');
         $query = $this->db->get();
         return $query->result();
     }
@@ -141,6 +155,18 @@ class User_model extends CI_Model {
         $this->db->where($col, $colVal);
         $this->db->update($table, $data);
         return true;
+    }
+    
+    /**
+     * This function is used to Update record in table  
+     */
+    public function get_mobile_number($users_id) {
+        $this->db->select('mobile_no');
+        $this->db->from('users');
+        $this->db->where('users_id', $users_id);
+        $query = $this->db->get()->row();
+        $query = (!empty($query)) ? ((array)$query) : array('mobile_no' => 0);
+        return $query;
     }
 
 }

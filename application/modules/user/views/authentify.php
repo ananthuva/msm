@@ -9,68 +9,34 @@
             <a href="<?php echo base_url(); ?>"><b>Verify Mobile Number</b></a>
         </div>
         <div class="register-box-body">
-            <p class="login-box-msg">Register a new membership</p>
+            <p class="login-box-msg">Verify your mobile number to access our services</p>
             <?php if ($this->session->flashdata("messagePr")) { ?>
                 <div class="alert alert-info">      
                     <?php echo $this->session->flashdata("messagePr") ?>
                 </div>
             <?php } ?>
-            <form action="<?php echo base_url() . 'user/registration'; ?>" method="post">
-
-                <div class="form-group has-feedback">
-                    <input type="text" name="name" class="form-control" data-validation="required" placeholder="Name">
-                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
-                </div>
-                
-                <div class="form-group has-feedback">
-                    <input type="text" name="lname" class="form-control" placeholder="Last Name">
-                    <span class="glyphicon glyphicon-user form-control-feedback"></span>
-                </div>
-
-                <div class="form-group has-feedback">
-                    <input type="text" name="email" class="form-control" data-validation="required" placeholder="Email">
-                    <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
-                </div>
-                
-                <div class="form-group has-feedback">
-                    <input type="text" name="mobile_no" data-validation="required" class="form-control" placeholder="Mobile Number" style="width: 65%;">
-                    <span class="glyphicon glyphicon-earphone form-control-feedback" style="left: 52%;"></span>
-                    <button type="button" style="width: 30%;" id="rolesAdd" class="btn btn-success form-control-element">Add</button>
-                </div>
-
-                <div class="form-group has-feedback">
-                    <input type="password" class="form-control" name="password_confirmation" placeholder="Password" data-validation="required">
-                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-                </div>
-                <div class="form-group has-feedback">
-                    <input type="password" name="password" class="form-control" placeholder="Retype password" data-validation="confirmation">
-                    <span class="glyphicon glyphicon-repeat form-control-feedback"></span>
-                </div>
-                <div class="form-group has-feedback">
-                    <!--<?php /* $type = json_decode(setting_all('user_type')); */ ?>
-                    <select name="user_type" id="" class="form-control">
-                    <?php /*
-                      foreach ($type as $key => $value) {
-                      if($value != 'admin') {
-                      echo '<option value="'.$value.'">'.ucfirst($value).'</option>';
-                      }
-                      } */
-                    ?>
-                    </select>-->
-                    <input type="hidden" name="user_type" class="form-control" value="Member"> 
-                    <input type="hidden" name="is_verified" class="form-control" value="0"> 
-                    <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
-                </div>
-                <div class="row">
-                    <div class="col-xs-12">
-                     <!--  <input type="hidden" name="user_type" value="<?php //echo setting_all('user_type'); ?>"> -->
-                        <input type="hidden" name="call_from" value="reg_page">
-                        <button type="submit" name="submit" class="btn btn-primary btn-block btn-flat btn-color">Register</button>
+                <form action="<?php echo base_url() . 'user/verifyMobileNumber'; ?>" method="post">
+                    <div class="form-group has-feedback">
+                        <input type="text" id="mobile_no" name="mobile_no" value ="<?php echo $mobile_no; ?>" data-validation="required" class="form-control" placeholder="Mobile Number" style="width: 65%;">
+                        <span class="glyphicon glyphicon-earphone form-control-feedback" style="left: 52%;"></span>
+                        <button type="button" style="width: 30%;" id="send_otp" class="btn btn-success form-control-element">Send OTP</button>
                     </div>
-                </div>
-            </form>
+                    <div class="form-group has-feedback div_otp hidden">
+                        <label>Please enter the verification code sent to your mobile</label>
+                        <input type="password" class="form-control" id="otp_confirmation" name="otp_confirmation" placeholder="Enter OTP" data-validation="required">
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                    <input type="hidden" id="user_id" name="user_id" class="form-control" value="<?php echo $user_id; ?>"> 
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <button type="submit" name="submit" class="btn btn-primary btn-block btn-flat btn-color">Verify</button>
+                        </div>
+                    </div>
+                </form>
             <br>
-            <a href="<?php echo base_url('user/login'); ?>" class="text-center">I already have a membership</a>
+            <p class="login-box-msg">
+                <a href="<?php echo base_url('user/login'); ?>" class="text-center">I already have a membership</a>
+            </p>
         </div>
         <!-- /.form-box -->
     </div>
@@ -78,39 +44,23 @@
 </body>
 <script>
     $(document).ready(function () {
-<?php if ($this->input->get('invited') && $this->input->get('invited') != '') { ?>
-            $burl = '<?php echo base_url() ?>';
-            $.ajax({
-                url: $burl + 'user/chekInvitation',
-                method: 'post',
-                data: {
-                    code: '<?php echo $this->input->get('invited'); ?>'
-                },
-                dataType: 'json'
-            }).done(function (data) {
-                console.log(data);
-                if (data.result == 'success') {
-                    $('[name="email"]').val(data.email);
-                    $('form').attr('action', $burl + 'user/register_invited/' + data.users_id);
-                } else {
-                    window.location.href = $burl + 'user/login';
-                }
-            });
-<?php } ?>
-    $('#verify_mobile').on('click',function(){
-        var ph_number = $('#mobile_no').val();
-        if (/^\d{10}$/.test(ph_number)) {
-           $.ajax({
-                url: '<?php echo base_url('user/sendOTPtoMobile'); ?>',
-                type: 'POST',
-                data: "mobile_number=" + ph_number,
-                success: function(data) {
-                    console.log(data);
-                }
-            });
-        } else {
-            alert('Invalid Mobile Number');
-        }
-    });
+        $('#send_otp').on('click',function(){
+            var ph_number = $('#mobile_no').val();
+            var user_id = $('#user_id').val();
+            $('#otp_confirmation').val('');
+            if (/^\d{10}$/.test(ph_number)) {
+               $.ajax({
+                    url: '<?php echo base_url('user/sendOTPtoMobile'); ?>',
+                    type: 'POST',
+                    data: "mobile_number=" + ph_number+ "&user_id=" + user_id,
+                    success: function(data) {
+                        $('.div_otp').removeClass('hidden');
+                        $('#send_otp').html('Resend OTP');
+                    }
+                });
+            } else {
+                alert('Invalid Mobile Number');
+            }
+        });
     });
 </script>
