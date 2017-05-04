@@ -109,7 +109,7 @@ class User extends CI_Controller {
             $data['status'] = 'active';
             $data['name'] = $content->first_name;
             $data['lname'] = $content->last_name;
-            $data['mobile_no'] = $content->mobile_no;
+            $data['mobile_no'] = '+91'.$content->mobile_no;
             $data['email'] = $content->email;
             $data['dob'] = date("Y-m-d", strtotime($content->dob));
             $data['user_type'] = 'Member';
