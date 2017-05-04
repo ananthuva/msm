@@ -95,3 +95,6 @@ defined('HOST')                OR define('HOST', ''); //host
 defined('PORT')                OR define('PORT', ''); //port
 defined('SMTP_SECURE')         OR define('SMTP_SECURE', '');//SMTPSecure
 defined('SMTP_PASSWORD')       OR define('SMTP_PASSWORD', '');//password
+
+defined('WS_USER')       OR define('WS_USER', 'mindmedi');//username
+defined('WS_PASSWORD')       OR define('WS_PASSWORD', '25omE3h7Hp');//password

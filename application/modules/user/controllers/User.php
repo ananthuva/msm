@@ -19,6 +19,109 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/profile', 'refresh');
         }
     }
+    
+    public function ws_api() {
+        if(strcasecmp($_SERVER['REQUEST_METHOD'], 'POST') != 0){
+             echo json_encode(array('error' => 'Request method must be POST!'));
+             exit;
+        }
+        if($this->input->get('user') && $this->input->get('password')){
+            if($this->input->get('user') == WS_USER && $this->input->get('password') == WS_PASSWORD){
+                $this->process_ws_api();
+            } else {
+                echo json_encode(array('error' => 'Invalid Request Credentials'));
+                exit;
+            }
+        } else {
+            echo json_encode(array('error' => 'Unauthorized Request'));
+            exit;
+        }
+    }
+    
+    public function process_ws_api() {
+        if($this->input->get('mod') && !empty($this->input->get('mod'))){
+            switch($this->input->get('mod')) {
+                case 'login' : $this->ws_login(); break;
+                case 'register' : $this->ws_register(); break;
+                default: echo json_encode(array('error' => 'Request syntax error'));
+            }
+        } else {
+            echo json_encode(array('error' => 'Invalid call'));
+        }
+        exit;
+    }
+    
+    public function ws_login() {
+        $content = json_decode(file_get_contents("php://input"));
+        if(!empty($content->email) && !empty($content->password)) {
+            $_POST['email'] = $content->email;
+            $_POST['password'] = $content->password;
+            $return = $this->User_model->auth_user();
+            if (empty($return)) {
+                echo json_encode(array('error' => 'Invalid username or password'));
+            } else {
+                if ($return == 'not_varified') {
+                    echo json_encode(array('error' => 'Accout not verified.'));
+                } else if(isset($return['number_not_verified']) && !empty($return['number_not_verified'])){ 
+                    echo json_encode(array('error' => 'User mobile not verified'));
+                } else {
+                    echo json_encode(array('success' => $return));
+                }
+            }
+        } else {
+            echo json_encode(array('error' => 'Invalid username or password'));
+        }
+        exit;
+    }
+    
+    public function ws_register() {
+        $content = json_decode(file_get_contents("php://input"));
+        if(empty($content->first_name)) {
+            echo json_encode(array('error' => 'Invalid first name'));
+        } else if(empty($content->email)){
+            echo json_encode(array('error' => 'Invalid email'));
+        } else if(empty($content->dob)){
+            echo json_encode(array('error' => 'Invalid dob'));
+        } else if(empty($content->mobile_no)){
+            echo json_encode(array('error' => 'Invalid mobile number'));
+        } else if(empty($content->password)){
+            echo json_encode(array('error' => 'Invalid password'));
+        } else {
+            $password = password_hash($content->password, PASSWORD_DEFAULT);
+            $checkValue = $this->User_model->check_exists('users', 'email', $content->email);
+            if ($checkValue == false) {
+                echo json_encode(array('error' => 'Email Already Registered'));
+                exit;
+            }
+            $checkValue1 = $this->User_model->check_exists('users', 'mobile_no', $content->mobile_no);
+            if ($checkValue1 == false) {
+                echo json_encode(array('error' => 'Mobile Already Registered'));
+                exit;
+            }
+            if (preg_match('/^[0-9]{10}+$/', $content->mobile_no) == 0) {
+                echo json_encode(array('error' => 'Invalid Mobile Number'));
+                exit;
+            }
+            if (!(filter_var($content->email, FILTER_VALIDATE_EMAIL))) {
+                echo json_encode(array('error' => 'Invalid Email'));
+                exit;
+            }
+            $data['status'] = 'active';
+            $data['name'] = $content->first_name;
+            $data['lname'] = $content->last_name;
+            $data['mobile_no'] = $content->mobile_no;
+            $data['email'] = $content->email;
+            $data['dob'] = date("Y-m-d", strtotime($content->dob));
+            $data['user_type'] = 'Member';
+            $data['user_id'] = 1;
+            $data['password'] = $password;
+            $data['profile_pic'] = 'user.png';
+            $data['is_deleted'] = 0;
+            $users_id = $this->User_model->insertRow('users', $data);
+            echo json_encode(array('success' => $users_id));
+        }
+        exit;
+    }
 
     /**
      * This function is used to load login view page
@@ -102,9 +205,9 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/login', 'refresh');
         } else {
             if ($return == 'not_varified') {
-                $this->session->set_flashdata('messagePr', 'This accout is not varified. Please contact to your admin..');
+                $this->session->set_flashdata('messagePr', 'This accout is not verified. Please contact to your admin..');
                 redirect(base_url() . 'user/login', 'refresh');
-            } else if(isset($return['number_not_varified']) && !empty($return['number_not_varified'])){ 
+            } else if(isset($return['number_not_verified']) && !empty($return['number_not_verified'])){ 
                 redirect(base_url() . 'user/authentify/'.$return['number_not_varified'], 'refresh');
             } else {
                 $this->session->set_userdata('user_details', $return);

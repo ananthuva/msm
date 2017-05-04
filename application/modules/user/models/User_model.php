@@ -28,7 +28,7 @@ class User_model extends CI_Model {
                 if ($result[0]->status != 'active') {
                     return 'not_varified';
                 } else if ($result[0]->is_verified != 1){
-                    return array('number_not_varified'=>$result[0]->users_id);
+                    return array('number_not_verified'=>$result[0]->users_id);
                 }
                 return $result;
             } else {
