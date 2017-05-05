@@ -19,14 +19,18 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/profile', 'refresh');
         }
     }
-    
+    /**
+     * This function is used to authenticate api
+     * @return String
+     */
     public function ws_api() {
         if(strcasecmp($_SERVER['REQUEST_METHOD'], 'POST') != 0){
              echo json_encode(array('error' => 'Request method must be POST!'));
              exit;
         }
-        if($this->input->get('user') && $this->input->get('password')){
-            if($this->input->get('user') == WS_USER && $this->input->get('password') == WS_PASSWORD){
+        $content = json_decode(file_get_contents("php://input"));
+        if($content->ws_username && $content->ws_password){
+            if($content->ws_username == WS_USER && $content->ws_password == WS_PASSWORD){
                 $this->process_ws_api();
             } else {
                 echo json_encode(array('error' => 'Invalid Request Credentials'));
@@ -37,12 +41,17 @@ class User extends CI_Controller {
             exit;
         }
     }
-    
+    /**
+     * This function is used to process api
+     * @return String
+     */
     public function process_ws_api() {
         if($this->input->get('mod') && !empty($this->input->get('mod'))){
             switch($this->input->get('mod')) {
                 case 'login' : $this->ws_login(); break;
                 case 'register' : $this->ws_register(); break;
+                case 'generate_otp' : $this->ws_sendOTPtoMobile(); break;
+                case 'verify_otp' : $this->ws_verifyMobileNumber(); break;
                 default: echo json_encode(array('error' => 'Request syntax error'));
             }
         } else {
@@ -50,7 +59,10 @@ class User extends CI_Controller {
         }
         exit;
     }
-    
+    /**
+     * This function is used for api login
+     * @return String
+     */
     public function ws_login() {
         $content = json_decode(file_get_contents("php://input"));
         if(!empty($content->email) && !empty($content->password)) {
@@ -73,7 +85,10 @@ class User extends CI_Controller {
         }
         exit;
     }
-    
+    /**
+     * This function is used for api registration
+     * @return String
+     */
     public function ws_register() {
         $content = json_decode(file_get_contents("php://input"));
         if(empty($content->first_name)) {
@@ -118,7 +133,53 @@ class User extends CI_Controller {
             $data['profile_pic'] = 'user.png';
             $data['is_deleted'] = 0;
             $users_id = $this->User_model->insertRow('users', $data);
-            echo json_encode(array('success' => $users_id));
+            echo json_encode(array('success' => array('user_id' => $users_id, 'mobile_number' => $content->mobile_no)));
+        }
+        exit;
+    }
+    /**
+     * This function is used for opt request using api
+     * @return String
+     */
+    public function ws_sendOTPtoMobile() {
+        $content = json_decode(file_get_contents("php://input"));
+        if(!empty($content->user_id) && !empty($content->mobile_number)) {
+            $_POST['user_id'] = $content->user_id;
+            $_POST['mobile_number'] = $content->mobile_number;
+            $return = $this->sendOTPtoMobile('ws');
+            if (empty($return)) {
+                echo json_encode(array('error' => 'Invalid userid'));
+            } else {
+                echo json_encode($return);
+            }
+        } else {
+            echo json_encode(array('error' => 'Invalid user_id or mobile number'));
+        }
+        exit;
+    }
+    /**
+     * This function is used for otp verification using api
+     * @return String
+     */
+    public function ws_verifyMobileNumber() {
+        $content = json_decode(file_get_contents("php://input"));
+        if(!empty($content->user_id) && !empty($content->otp)) {
+            $user_id = $content->user_id;
+            $otp = $content->otp;
+            $res = $this->User_model->verifyMobileNumber($otp, $user_id);
+            if (!empty($res)) {
+                $this->User_model->updateRow('users', 'users_id', $user_id, array('is_verified' => 1));
+                
+                if (isset($content->mobile_number) && !empty($content->mobile_number))
+                    $this->User_model->updateRow('users', 'users_id', $user_id, array('mobile_no' => $content->mobile_number));
+                
+                echo json_encode(array('success' => 'Verified'));
+            } else {
+                echo json_encode(array('error' => 'Invalid OTP'));
+            }
+            
+        } else {
+            echo json_encode(array('error' => 'Invalid user_id or otp'));
         }
         exit;
     }
@@ -183,7 +244,7 @@ class User extends CI_Controller {
         }
         //Check if admin allow to registration for user
         if (setting_all('register_allowed') == 1) {
-            $data = array('title' => 'Authentification');
+            $data = array('title' => 'Authentication');
             $mobile_number = $this->User_model->get_mobile_number($user_id);
             $mobile_number['user_id'] = $user_id;
             $this->load->view('include/script', $data);
@@ -324,7 +385,7 @@ class User extends CI_Controller {
      * This function is used to send OTP to registered mobiles
      * @return : void
      */
-    public function sendOTPtoMobile() {
+    public function sendOTPtoMobile($ws = '') {
         $mobileNumber = $this->input->post('mobile_number');
         $user_id = $this->input->post('user_id');
         $otp = $this->getOTP();
@@ -358,6 +419,9 @@ class User extends CI_Controller {
            $result['error'] = "cURL Error #:" . $err;
         } else {
            $result['success'] = $otp;
+        }
+        if(!empty($ws)){
+            return $result;
         }
         echo json_encode($result); 
     }
