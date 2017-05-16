@@ -29,7 +29,7 @@ class User extends CI_Controller {
              exit;
         }
         $content = json_decode(file_get_contents("php://input"));
-        if($content->ws_username && $content->ws_password){
+        if(isset($content->ws_username) && isset($content->ws_password)){
             if($content->ws_username == WS_USER && $content->ws_password == WS_PASSWORD){
                 $this->process_ws_api();
             } else {
