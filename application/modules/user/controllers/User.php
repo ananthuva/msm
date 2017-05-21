@@ -72,7 +72,7 @@ class User extends CI_Controller {
             if (empty($return)) {
                 echo json_encode(array('error' => 'Invalid username or password'));
             } else {
-                if ($return == 'not_varified') {
+                if ($return == 'not_verified') {
                     echo json_encode(array('error' => 'Accout not verified.'));
                 } else if(isset($return['number_not_verified']) && !empty($return['number_not_verified'])){ 
                     echo json_encode(array('error' => 'User mobile not verified'));
@@ -265,11 +265,11 @@ class User extends CI_Controller {
             $this->session->set_flashdata('messagePr', 'Invalid details');
             redirect(base_url() . 'user/login', 'refresh');
         } else {
-            if ($return == 'not_varified') {
+            if ($return == 'not_verified') {
                 $this->session->set_flashdata('messagePr', 'This accout is not verified. Please contact to your admin..');
                 redirect(base_url() . 'user/login', 'refresh');
             } else if(isset($return['number_not_verified']) && !empty($return['number_not_verified'])){ 
-                redirect(base_url() . 'user/authentify/'.$return['number_not_varified'], 'refresh');
+                redirect(base_url() . 'user/authentify/'.$return['number_not_verified'], 'refresh');
             } else {
                 $this->session->set_userdata('user_details', $return);
             }
@@ -287,7 +287,7 @@ class User extends CI_Controller {
             $setting = settings();
             $res = $this->User_model->get_data_by('users', $this->input->post('email'), 'email', 1);
             if (isset($res[0]->users_id) && $res[0]->users_id != '') {
-                $var_key = $this->getVarificationCode();
+                $var_key = $this->getVerificationCode();
                 $this->User_model->updateRow('users', 'users_id', $res[0]->users_id, array('var_key' => $var_key));
                 $sub = "Reset password";
                 $email = $this->input->post('email');
@@ -296,8 +296,8 @@ class User extends CI_Controller {
                     'action_url' => base_url(),
                     'sender_name' => $setting['company_name'],
                     'website_name' => $setting['website'],
-                    'varification_link' => base_url() . 'user/mail_varify?code=' . $var_key,
-                    'url_link' => base_url() . 'user/mail_varify?code=' . $var_key,
+                    'verification_link' => base_url() . 'user/mail_verify?code=' . $var_key,
+                    'url_link' => base_url() . 'user/mail_verify?code=' . $var_key,
                 );
                 $body = $this->User_model->get_template('forgot_password');
                 $body = $body->html;
@@ -330,11 +330,11 @@ class User extends CI_Controller {
     }
 
     /**
-     * This function is used to load view of reset password and varify user too 
+     * This function is used to load view of reset password and verify user too 
      * @return : void
      */
-    public function mail_varify() {
-        $return = $this->User_model->mail_varify();
+    public function mail_verify() {
+        $return = $this->User_model->mail_verify();
         $data = array('title' => 'Verify mail');
         $this->load->view('include/script', $data);
         if ($return) {
@@ -430,9 +430,9 @@ class User extends CI_Controller {
      * This function is generate hash code for random string
      * @return string
      */
-    public function getVarificationCode() {
+    public function getVerificationCode() {
         $pw = $this->randomString();
-        return $varificat_key = password_hash($pw, PASSWORD_DEFAULT);
+        return $verificat_key = password_hash($pw, PASSWORD_DEFAULT);
     }
     
     /**
@@ -607,11 +607,15 @@ class User extends CI_Controller {
         $this->form_validation->set_rules('email', 'Email', 'trim|valid_email');   
         $this->form_validation->set_rules('mobile_no', 'Mobile Number', 'trim|numeric|exact_length[10]');    
         $this->form_validation->set_rules('name', 'First Name', 'trim|required');
+        $this->form_validation->set_rules('dob', 'Date of Birth', 'trim|required');
         if ($id != '') {
             $this->form_validation->set_rules('password', 'Password', 'trim|required');
         }
         if ($this->form_validation->run() === TRUE) {
             $_POST['mobile_no'] = '+91'.$_POST['mobile_no'];
+            if(isset($_POST['dob'])) {
+                $_POST['dob'] = date("Y-m-d", strtotime($_POST['dob']));
+            }
             if ($id != '') {
                 $data = $this->input->post();
                 if ($this->input->post('status') != '') {
@@ -843,7 +847,7 @@ class User extends CI_Controller {
     }
 
     /**
-     * This function is used to Generate a token for varification
+     * This function is used to Generate a token for verification
      * @return String
      */
     public function generate_token() {

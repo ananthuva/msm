@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
 <?php if ($this->session->flashdata("alert_msg")) { ?>
     <div class="alert alert-danger">      
         <?php echo $this->session->flashdata("alert_msg") ?>
@@ -26,7 +27,12 @@
                     <input type="text" name="lname" class="form-control" placeholder="Last Name">
                     <span class="glyphicon glyphicon-user form-control-feedback"></span>
                 </div>
-
+                
+                <div class="form-group has-feedback">
+                    <input type="text" id="dob" name="dob" class="form-control" data-validation="required" placeholder="Date of Birth">
+                    <span class="glyphicon glyphicon-calendar form-control-feedback"></span>
+                </div>
+                
                 <div class="form-group has-feedback">
                     <input type="text" name="email" class="form-control" data-validation="required" placeholder="Email">
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
@@ -95,5 +101,13 @@
                 }
             });
 <?php } ?>
+        $( "#dob" ).datepicker({
+            changeMonth: true,
+            changeYear: true,
+            autoSize: true,
+            yearRange: "-70:+0",
+            maxDate: "+0D"
+        });
     });
 </script>
+  

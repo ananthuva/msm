@@ -26,7 +26,7 @@ class User_model extends CI_Model {
         if (!empty($result)) {
             if (password_verify($password, $result[0]->password)) {
                 if ($result[0]->status != 'active') {
-                    return 'not_varified';
+                    return 'not_verified';
                 } else if ($result[0]->is_verified != 1){
                     return array('number_not_verified'=>$result[0]->users_id);
                 }
@@ -49,9 +49,9 @@ class User_model extends CI_Model {
     }
 
     /**
-     * This function is used to load view of reset password and varify user too 
+     * This function is used to load view of reset password and verify user too 
      */
-    function mail_varify() {
+    function mail_verify() {
         $ucode = $this->input->get('code');
         $this->db->select('email as e_mail');
         $this->db->from('users');
