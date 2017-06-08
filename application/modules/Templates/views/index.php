@@ -61,7 +61,7 @@ jQuery(document).ready(function($) {
 		"language": {"search": "_INPUT_", "searchPlaceholder": "Search"}, 
 		"iDisplayLength": 10,
 		"aLengthMenu": [[10, 25, 50, 100,500,-1], [10, 25, 50,100,500,"All"]],
-        "ajax": url+"templates/ajax_data"
+        "ajax": url+"Templates/ajax_data"
     });
 
 
@@ -69,6 +69,6 @@ jQuery(document).ready(function($) {
 
 function setId(id) {
 	var url =  "<?php echo site_url();?>";
-	$("#cnfrm_delete").find("a.yes-btn").attr("href",url+"/templates/delete_data/"+id);
+	$("#cnfrm_delete").find("a.yes-btn").attr("href",url+"/Templates/delete_data/"+id);
 }
 </script>

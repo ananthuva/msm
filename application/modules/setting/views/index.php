@@ -37,12 +37,12 @@
                       <span>Permission</span>
                     </a>
                   </li>
-                  <!--<li id="templates">
+                  <li id="templates">
                     <a href="#templates-div" data-toggle="tab">
                       <i class="fa fa-puzzle-piece" aria-hidden="true"></i> 
                       <span>Templates</span>
                     </a>
-                  </li>-->
+                  </li>
                 </ul>
                 <div class="tab-content col-md-9">
                   <div class="tab-pane fade in" id="templates-div"></div>
@@ -455,7 +455,7 @@ $(document).ready(function() {
   $('#templates').on('click', function() {
     $('#templates-div').html('');
     $.ajax({  
-      url: '<?php echo base_url().'templates'; ?>',
+      url: '<?php echo base_url().'Templates'; ?>',
       method:'post',
       data:{
         showTemplate: 'showTemplate'

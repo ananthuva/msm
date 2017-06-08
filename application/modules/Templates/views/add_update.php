@@ -1,4 +1,4 @@
-<form action="<?php echo base_url()."templates/add_edit"; ?>" method="post" role="form" id="form" enctype="multipart/form-data" style="padding: 0px 30px">
+<form action="<?php echo base_url()."Templates/add_edit"; ?>" method="post" role="form" id="form" enctype="multipart/form-data" style="padding: 0px 30px">
  <?php if(isset($data->id)){?><input type="hidden"  name="id" value="<?php echo isset($data->id) ?$data->id : "";?>"> <?php } ?>
  	<div class="box-body">
 		<div class="row">

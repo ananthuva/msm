@@ -2,11 +2,12 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed ');
 
-class User extends CI_Controller {
+class Store extends CI_Controller {
 
     function __construct() {
         parent::__construct();
-        $this->load->model('User_model');
+        
+        $this->load->model('Store_model');
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->users_id : '1';
     }
 
@@ -14,10 +15,10 @@ class User extends CI_Controller {
      * This function is redirect to users profile page
      * @return Void
      */
-    public function index() {
-        if (is_login()) {
-            redirect(base_url() . 'user/profile', 'refresh');
-        }
+    public function index() { 
+        $this->load->view('include/header');
+        $this->load->view('user/profile', $data);
+        $this->load->view('include/footer');
     }
     /**
      * This function is used to authenticate api
@@ -25,7 +26,7 @@ class User extends CI_Controller {
      */
     public function ws_api() {
         if(strcasecmp($_SERVER['REQUEST_METHOD'], 'POST') != 0){
-             echo json_encode(array('result' => 'false','error' => 'Request method must be POST!'));
+             echo json_encode(array('error' => 'Request method must be POST!'));
              exit;
         }
         $content = json_decode(file_get_contents("php://input"));
@@ -33,11 +34,11 @@ class User extends CI_Controller {
             if($content->ws_username == WS_USER && $content->ws_password == WS_PASSWORD){
                 $this->process_ws_api();
             } else {
-                echo json_encode(array('result' => 'false','error' => 'Invalid Request Credentials'));
+                echo json_encode(array('error' => 'Invalid Request Credentials'));
                 exit;
             }
         } else {
-            echo json_encode(array('result' => 'false','error' => 'Unauthorized Request'));
+            echo json_encode(array('error' => 'Unauthorized Request'));
             exit;
         }
     }
@@ -52,10 +53,10 @@ class User extends CI_Controller {
                 case 'register' : $this->ws_register(); break;
                 case 'generate_otp' : $this->ws_sendOTPtoMobile(); break;
                 case 'verify_otp' : $this->ws_verifyMobileNumber(); break;
-                default: echo json_encode(array('result' => 'false','error' => 'Request syntax error'));
+                default: echo json_encode(array('error' => 'Request syntax error'));
             }
         } else {
-            echo json_encode(array('result' => 'false','error' => 'Invalid call'));
+            echo json_encode(array('error' => 'Invalid call'));
         }
         exit;
     }
@@ -70,18 +71,18 @@ class User extends CI_Controller {
             $_POST['password'] = $content->password;
             $return = $this->User_model->auth_user();
             if (empty($return)) {
-                echo json_encode(array('result' => 'false','error' => 'Invalid username or password'));
+                echo json_encode(array('error' => 'Invalid username or password'));
             } else {
                 if ($return == 'not_verified') {
-                    echo json_encode(array('result' => 'false','error' => 'Accout not verified.'));
+                    echo json_encode(array('error' => 'Accout not verified.'));
                 } else if(isset($return['number_not_verified']) && !empty($return['number_not_verified'])){ 
-                    echo json_encode(array('result' => 'false','error' => 'User mobile not verified'));
+                    echo json_encode(array('error' => 'User mobile not verified'));
                 } else {
-                    echo json_encode(array('result' => 'true','data' => $return));
+                    echo json_encode(array('success' => $return));
                 }
             }
         } else {
-            echo json_encode(array('result' => 'false','error' => 'Invalid username or password'));
+            echo json_encode(array('error' => 'Invalid username or password'));
         }
         exit;
     }
@@ -92,35 +93,35 @@ class User extends CI_Controller {
     public function ws_register() {
         $content = json_decode(file_get_contents("php://input"));
         if(empty($content->first_name)) {
-            echo json_encode(array('result' => 'false','error' => 'Invalid first name'));
+            echo json_encode(array('error' => 'Invalid first name'));
         } else if(empty($content->email)){
-            echo json_encode(array('result' => 'false','error' => 'Invalid email'));
+            echo json_encode(array('error' => 'Invalid email'));
         } else if(empty($content->dob)){
-            echo json_encode(array('result' => 'false','error' => 'Invalid dob'));
+            echo json_encode(array('error' => 'Invalid dob'));
         } else if(empty($content->mobile_no)){
-            echo json_encode(array('result' => 'false','error' => 'Invalid mobile number'));
+            echo json_encode(array('error' => 'Invalid mobile number'));
         } else if(empty($content->password)){
-            echo json_encode(array('result' => 'false','error' => 'Invalid password'));
+            echo json_encode(array('error' => 'Invalid password'));
         } else {
-            if (!(filter_var($content->email, FILTER_VALIDATE_EMAIL))) {
-                echo json_encode(array('result' => 'false','error' => 'Invalid Email'));
+            $password = password_hash($content->password, PASSWORD_DEFAULT);
+            $checkValue = $this->User_model->check_exists('users', 'email', $content->email);
+            if ($checkValue == false) {
+                echo json_encode(array('error' => 'Email Already Registered'));
+                exit;
+            }
+            $checkValue1 = $this->User_model->check_exists('users', 'mobile_no', $content->mobile_no);
+            if ($checkValue1 == false) {
+                echo json_encode(array('error' => 'Mobile Already Registered'));
                 exit;
             }
             if (preg_match('/^[0-9]{10}+$/', $content->mobile_no) == 0) {
-                echo json_encode(array('result' => 'false','error' => 'Invalid Mobile Number'));
+                echo json_encode(array('error' => 'Invalid Mobile Number'));
                 exit;
             }
-            $checkValue = $this->User_model->check_exists('users', 'email', $content->email);
-            if ($checkValue == false) {
-                echo json_encode(array('result' => 'false','error' => 'Email Already Registered'));
+            if (!(filter_var($content->email, FILTER_VALIDATE_EMAIL))) {
+                echo json_encode(array('error' => 'Invalid Email'));
                 exit;
             }
-            $checkValue1 = $this->User_model->check_exists('users', 'mobile_no', '+91'.$content->mobile_no);
-            if ($checkValue1 == false) {
-                echo json_encode(array('result' => 'false','error' => 'Mobile Already Registered'));
-                exit;
-            }
-            $password = password_hash($content->password, PASSWORD_DEFAULT);
             $data['status'] = 'active';
             $data['name'] = $content->first_name;
             $data['lname'] = $content->last_name;
@@ -133,7 +134,7 @@ class User extends CI_Controller {
             $data['profile_pic'] = 'user.png';
             $data['is_deleted'] = 0;
             $users_id = $this->User_model->insertRow('users', $data);
-            echo json_encode(array('result' => 'true','UserDetails' => array('UserId' => $users_id, 'Mobile' => $content->mobile_no)));
+            echo json_encode(array('success' => array('user_id' => $users_id, 'mobile_number' => $content->mobile_no)));
         }
         exit;
     }
@@ -148,12 +149,12 @@ class User extends CI_Controller {
             $_POST['mobile_number'] = $content->mobile_number;
             $return = $this->sendOTPtoMobile('ws');
             if (empty($return)) {
-                echo json_encode(array('result' => 'false','error' => 'Invalid userid'));
+                echo json_encode(array('error' => 'Invalid userid'));
             } else {
                 echo json_encode($return);
             }
         } else {
-            echo json_encode(array('result' => 'false','error' => 'Invalid user_id or mobile number'));
+            echo json_encode(array('error' => 'Invalid user_id or mobile number'));
         }
         exit;
     }
@@ -173,13 +174,13 @@ class User extends CI_Controller {
                 if (isset($content->mobile_number) && !empty($content->mobile_number))
                     $this->User_model->updateRow('users', 'users_id', $user_id, array('mobile_no' => $content->mobile_number));
                 
-                echo json_encode(array('result' => 'true'));
+                echo json_encode(array('success' => 'Verified'));
             } else {
-                echo json_encode(array('result' => 'false','error' => 'Invalid OTP'));
+                echo json_encode(array('error' => 'Invalid OTP'));
             }
             
         } else {
-            echo json_encode(array('result' => 'false','error' => 'Invalid user_id or otp'));
+            echo json_encode(array('error' => 'Invalid user_id or otp'));
         }
         exit;
     }
@@ -389,50 +390,41 @@ class User extends CI_Controller {
         $mobileNumber = $this->input->post('mobile_number');
         $user_id = $this->input->post('user_id');
         $otp = $this->getOTP();
-        $mobileNumber = '+91'.substr($mobileNumber, -10);
-        $result = $this->User_model->updateRow('users', 'users_id', $user_id, array('var_otp' => $otp),'mobile_no',$mobileNumber);
-        if($result){
-            $message = urlencode($otp. " is your verification code");
+        $this->User_model->updateRow('users', 'users_id', $user_id, array('var_otp' => $otp));
+        $message = urlencode($otp. " is your verification code");
 
-            //Prepare you post parameters
-            $postData = array(
-                'mobiles' => $mobileNumber,
-                'message' => $message,
-                'sender' => 'MED-REGISTER',
-                'route' => 4
-            );
-            $url = "https://control.msg91.com/api/v2/sendsms";
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => "$url",
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_CUSTOMREQUEST => "POST",
-                CURLOPT_POSTFIELDS => $postData,
-                CURLOPT_HTTPHEADER => array(
-                    "authkey:150795AKEnh1ZS5906a523",
-                    "content-type: multipart/form-data"
-                ),
-            ));
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-            curl_close($curl);
-            $result = array();
-            if ($err) {
-               $result['result'] = 'false';
-               $result['error'] = "cURL Error #:" . $err;
-            } else {
-               $result['result'] = 'true';
-               $result['otp'] = $otp;
-            }
-            if(!empty($ws)){
-                return $result;
-            }
-            echo json_encode($result);
-        } else if(!empty($ws)) {
-            return array('result' => 'false','error' => 'Invalid Mobile or UserId');
+        //Prepare you post parameters
+        $postData = array(
+            'mobiles' => $mobileNumber,
+            'message' => $message,
+            'sender' => 'MED-REGISTER',
+            'route' => 4
+        );
+        $url = "https://control.msg91.com/api/v2/sendsms";
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "$url",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => $postData,
+            CURLOPT_HTTPHEADER => array(
+                "authkey:150795AKEnh1ZS5906a523",
+                "content-type: multipart/form-data"
+            ),
+        ));
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        curl_close($curl);
+        $result = array();
+        if ($err) {
+           $result['error'] = "cURL Error #:" . $err;
         } else {
-            echo json_encode(array('result' => 'false','error' => 'Invalid Mobile or UserId'));
+           $result['success'] = $otp;
         }
+        if(!empty($ws)){
+            return $result;
+        }
+        echo json_encode($result); 
     }
 
     /**

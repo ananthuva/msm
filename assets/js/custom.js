@@ -181,7 +181,7 @@ $(document).ready(function() {
       $obj = $(this);
       $tmp_id = $obj.attr('data-src');
       $.ajax({
-        url: $('body').attr('data-base-url') + "templates/preview",
+        url: $('body').attr('data-base-url') + "Templates/preview",
         method:'post',
         data:{
           template_id: $tmp_id
@@ -195,7 +195,7 @@ $(document).ready(function() {
 
   $(".content-wrapper").on("click",".templateModalButton", function(e) {  
     $.ajax({
-      url : $('body').attr('data-base-url') + "templates/modal_form",
+      url : $('body').attr('data-base-url') + "Templates/modal_form",
       method: "post", 
       data : {
       id: $(this).attr("data-src")

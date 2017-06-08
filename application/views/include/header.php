@@ -97,7 +97,7 @@
 
                     <ul class="sidebar-menu">
                         <li class="header"><!-- MAIN NAVIGATION --></li>
-                        <?php //echo '<pre>';print_r($this->router); die; ?>
+                        <?php // echo '<pre>';print_r($this->router); die; ?>
                         <li class="<?= ($this->router->method === "profile") ? "active" : "not-active" ?>"> 
                             <a href="<?php echo base_url('user/profile'); ?>"> <i class="fa fa-user"></i> <span>My Account</span></a>
                         </li>                
@@ -112,11 +112,14 @@
                             <li class="<?= ($this->router->class === "setting") ? "active" : "not-active" ?>">
                                 <a href="<?php echo base_url("setting"); ?>"><i class="fa fa-cogs"></i> <span>Settings</span></a>
                             </li>
-
-               <!-- <li class="<?php //echo ($this->router->class==="Templates")?"active":"not-active" ?>">
-                   <a href="<?php //echo base_url("Templates");  ?>"><i class="fa fa-cubes"></i> <span>Templates</span></a>
-               </li> -->
-                        <?php } /* if(CheckPermission("invoice", "own_read")){ ?>   
+                        <?php } ?>
+                        <?php if (isset($this->session->userdata('user_details')[0]->user_type) && ($this->session->userdata('user_details')[0]->user_type == 'member' || 
+                                    $this->session->userdata('user_details')[0]->user_type == 'admin' )) { ?>
+                            <li class="<?php echo ($this->router->class==="store")?"active":"not-active" ?>">
+                                <a href="<?php echo base_url("store");  ?>"><i class="fa fa-cubes"></i> <span>Medical Stores</span></a>
+                            </li>
+                        <?php }
+                        /* if(CheckPermission("invoice", "own_read")){ ?>   
                           <li class="<?=($this->router->class==="invoice")?"active":"not-active"?>">
                           <a href="<?php echo base_url("invoice/view"); ?>"><i class="fa fa-list-alt"></i> <span>Invoice</span></a>
                           </li>

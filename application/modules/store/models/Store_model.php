@@ -1,5 +1,5 @@
 <?php
-class User_model extends CI_Model {       
+class Store_model extends CI_Model {       
     function __construct() {
         parent::__construct();
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->users_id : '1';
@@ -151,13 +151,10 @@ class User_model extends CI_Model {
     /**
      * This function is used to Update record in table  
      */
-    public function updateRow($table, $col, $colVal, $data, $col2 = '', $col2Val = '') {
+    public function updateRow($table, $col, $colVal, $data) {
         $this->db->where($col, $colVal);
-        if(!empty($col2)){
-            $this->db->where($col2, $col2Val);
-        }
         $this->db->update($table, $data);
-        return $this->db->affected_rows();
+        return true;
     }
     
     /**
