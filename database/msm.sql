@@ -77,8 +77,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
-  `users_id` int(121) NOT NULL AUTO_INCREMENT,
-  `user_id` varchar(255) DEFAULT NULL,
+  `user_id` int(121) NOT NULL AUTO_INCREMENT,
+  `created_by` varchar(255) DEFAULT NULL,
   `var_key` varchar(255) DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
   `is_deleted` varchar(255) DEFAULT '0',
@@ -94,14 +94,14 @@ CREATE TABLE `users` (
   `user_type` enum('Admin','Pharmasist','Member') DEFAULT NULL,
   `var_otp` int(4) DEFAULT NULL,
   `is_verified` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`users_id`)
+  PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
 
 /*Data for the table `users` */
 
 LOCK TABLES `users` WRITE;
 
-insert  into `users`(`users_id`,`user_id`,`var_key`,`status`,`is_deleted`,`name`,`lname`,`password`,`mobile_no`,`phone_no`,`email`,`dob`,`address`,`profile_pic`,`user_type`,`var_otp`,`is_verified`) values (1,'1','','active','0','admin',NULL,'$2y$10$/R/ys6rRs86DEiwzDp1kU.2Ix7Hpr8cTyyBDuIpL80YdMXegi7cMW','+918129293159',NULL,'ava007jb@gmail.com','0000-00-00',NULL,'demo_pic.png','Admin',NULL,0),(2,'1',NULL,'active','0','pharmasist',NULL,'$2y$10$0.pVMGrmUNad52skOf3jauzGMBAhr7WoJda53V6WTcgURmZzrJV.2',NULL,NULL,'asd@wer.com','0000-00-00',NULL,'user.png','Pharmasist',NULL,0),(4,'1',NULL,'active','0','7546','456456456','$2y$10$/R/ys6rRs86DEiwzDp1kU.2Ix7Hpr8cTyyBDuIpL80YdMXegi7cMW','456456','456456456','456456','0000-00-00','456456456','user.png','Member',NULL,0),(5,'1',NULL,'active','0','444','456456456','$2y$10$/GJvwhf7spXJVhzwIGmIaeIPnxo/GGgHJZQ3pG.yzJXBEgnI15Um6','4564568','456456456','admin','0000-00-00','66565','user.png','Member',NULL,0),(10,'1',NULL,'active','0','a','A','$2y$10$M59WW/f9.qZU.yKmbHhfWu3TK66P8WFc69Z35sqBdvXqh1r2R2yIW','+911111111111',NULL,'a@s.x','0000-00-00',NULL,'user.png','Member',NULL,0),(11,'1',NULL,'active','0','fff','fff','$2y$10$ZwJx3nqQL8WDfEqJoFtwf.935HnV98104i6UgzQSp.rMkmwges5we','+913333333333',NULL,'f@e.s','0000-00-00',NULL,'user.png','Member',NULL,0),(12,'1',NULL,'active','0','ss','ss','$2y$10$Al7WuYvVy59LTV95Co2T0evKukmaTGlrc/KvQwWyshgTad.i3R052','+913333333335',NULL,'dd@w.d','2017-05-08',NULL,'user.png','Member',NULL,0);
+insert  into `users`(`user_id`,`created_by`,`var_key`,`status`,`is_deleted`,`name`,`lname`,`password`,`mobile_no`,`phone_no`,`email`,`dob`,`address`,`profile_pic`,`user_type`,`var_otp`,`is_verified`) values (1,'1','','active','0','admin',NULL,'$2y$10$/R/ys6rRs86DEiwzDp1kU.2Ix7Hpr8cTyyBDuIpL80YdMXegi7cMW','+918129293159',NULL,'ava007jb@gmail.com','0000-00-00',NULL,'demo_pic.png','Admin',NULL,0),(2,'1',NULL,'active','0','pharmasist',NULL,'$2y$10$0.pVMGrmUNad52skOf3jauzGMBAhr7WoJda53V6WTcgURmZzrJV.2',NULL,NULL,'asd@wer.com','0000-00-00',NULL,'user.png','Pharmasist',NULL,0),(4,'1',NULL,'active','0','7546','456456456','$2y$10$/R/ys6rRs86DEiwzDp1kU.2Ix7Hpr8cTyyBDuIpL80YdMXegi7cMW','456456','456456456','456456','0000-00-00','456456456','user.png','Member',NULL,0),(5,'1',NULL,'active','0','444','456456456','$2y$10$/GJvwhf7spXJVhzwIGmIaeIPnxo/GGgHJZQ3pG.yzJXBEgnI15Um6','4564568','456456456','admin','0000-00-00','66565','user.png','Member',NULL,0),(10,'1',NULL,'active','0','a','A','$2y$10$M59WW/f9.qZU.yKmbHhfWu3TK66P8WFc69Z35sqBdvXqh1r2R2yIW','+911111111111',NULL,'a@s.x','0000-00-00',NULL,'user.png','Member',NULL,0),(11,'1',NULL,'active','0','fff','fff','$2y$10$ZwJx3nqQL8WDfEqJoFtwf.935HnV98104i6UgzQSp.rMkmwges5we','+913333333333',NULL,'f@e.s','0000-00-00',NULL,'user.png','Member',NULL,0),(12,'1',NULL,'active','0','ss','ss','$2y$10$Al7WuYvVy59LTV95Co2T0evKukmaTGlrc/KvQwWyshgTad.i3R052','+913333333335',NULL,'dd@w.d','2017-05-08',NULL,'user.png','Member',NULL,0);
 
 UNLOCK TABLES;
 

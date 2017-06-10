@@ -95,7 +95,7 @@
                 console.log(data);
                 if (data.result == 'success') {
                     $('[name="email"]').val(data.email);
-                    $('form').attr('action', $burl + 'user/register_invited/' + data.users_id);
+                    $('form').attr('action', $burl + 'user/register_invited/' + data.user_id);
                 } else {
                     window.location.href = $burl + 'user/login';
                 }

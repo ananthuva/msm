@@ -131,8 +131,8 @@
                     </div>
                 </div>                
         </div>
-        <?php if (!empty($userData->users_id)) { ?>
-            <input type="hidden"  name="users_id" value="<?php echo isset($userData->users_id) ? $userData->users_id : ''; ?>">
+        <?php if (!empty($userData->user_id)) { ?>
+            <input type="hidden"  name="user_id" value="<?php echo isset($userData->user_id) ? $userData->user_id : ''; ?>">
             <input type="hidden" name="fileOld" value="<?php echo isset($userData->profile_pic) ? $userData->profile_pic : ''; ?>">
             <div class="box-footer sub-btn-wdt">
                 <button type="submit" name="edit" value="edit" class="btn btn-success wdt-bg">Update</button>

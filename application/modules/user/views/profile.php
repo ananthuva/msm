@@ -80,7 +80,7 @@
             </div>  
             <br>
             <div class="form-group has-feedback sub-btn-wdt" >
-              <input type="hidden" name="users_id" value="<?php echo isset($user_data[0]->users_id)?$user_data[0]->users_id:''; ?>">
+              <input type="hidden" name="user_id" value="<?php echo isset($user_data[0]->user_id)?$user_data[0]->user_id:''; ?>">
               <input type="hidden" name="user_type" value="<?php echo isset($user_data[0]->user_type)?$user_data[0]->user_type:''; ?>">
               <button name="submit1" type="button" id="profileSubmit" class="btn btn-success btn-md wdt-bg">Save</button>  
               <!-- <div class=" pull-right">
