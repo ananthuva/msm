@@ -83,7 +83,7 @@ class User extends CI_Controller {
                     unset($UserData['is_deleted']);
                     unset($UserData['var_otp']);
                     unset($UserData['created_by']);
-                    echo json_encode(array('result' => 'true','UserData' => $UserData));
+                    echo str_replace(':null',':""',json_encode(array('result' => 'true','UserData' => $UserData)));
                 }
             }
         } else {
@@ -144,7 +144,7 @@ class User extends CI_Controller {
             unset($data['password']);
             unset($data['profile_pic']);
             unset($data['is_deleted']);
-            echo json_encode(array('result' => 'true','UserDetails' => $data));
+            echo str_replace(':null',':""',json_encode(array('result' => 'true','UserData' => $data)));
         }
         exit;
     }

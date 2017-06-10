@@ -28,7 +28,7 @@ class User_model extends CI_Model {
                 if ($result[0]->status != 'active') {
                     return 'not_verified';
                 } else if ($result[0]->is_verified != 1){
-                    return array('number_not_verified'=>$result[0]->user_id);
+                    //return array('number_not_verified'=>$result[0]->user_id); //disable mobile verification
                 }
                 return $result;
             } else {
