@@ -19,33 +19,12 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/profile', 'refresh');
         }
     }
-    /**
-     * This function is used to authenticate api
-     * @return String
-     */
-    public function ws_api() {
-        if(strcasecmp($_SERVER['REQUEST_METHOD'], 'POST') != 0){
-             echo json_encode(array('result' => 'false','error' => 'Request method must be POST!'));
-             exit;
-        }
-        $content = json_decode(file_get_contents("php://input"));
-        if(isset($content->ws_username) && isset($content->ws_password)){
-            if($content->ws_username == WS_USER && $content->ws_password == WS_PASSWORD){
-                $this->process_ws_api();
-            } else {
-                echo json_encode(array('result' => 'false','error' => 'Invalid Request Credentials'));
-                exit;
-            }
-        } else {
-            echo json_encode(array('result' => 'false','error' => 'Unauthorized Request'));
-            exit;
-        }
-    }
+ 
     /**
      * This function is used to process api
      * @return String
      */
-    public function process_ws_api() {
+    public function ws_api() {
         if($this->input->get('mod') && !empty($this->input->get('mod'))){
             switch($this->input->get('mod')) {
                 case 'login' : $this->ws_login(); break;
@@ -78,12 +57,17 @@ class User extends CI_Controller {
                     echo json_encode(array('result' => 'false','error' => 'User mobile not verified'));
                 } else {
                     $UserData = (array)$return[0];
+                    $key = $this->randomString();
+                    $token = simple_crypt($UserData['email'],$key); 
+                    $hash = password_hash($UserData['email'], PASSWORD_DEFAULT);
+                    $this->User_model->updateRow('users', 'user_id', $UserData['user_id'], array('hash' => $hash));
                     unset($UserData['password']);
                     unset($UserData['var_key']);
                     unset($UserData['is_deleted']);
                     unset($UserData['var_otp']);
                     unset($UserData['created_by']);
-                    echo str_replace(':null',':""',json_encode(array('result' => 'true','UserData' => $UserData)));
+                    unset($UserData['hash']);
+                    echo str_replace(':null',':""',json_encode(array('result' => 'true','token' => $token.':'.$key,'UserData' => $UserData)));
                 }
             }
         } else {
@@ -134,16 +118,15 @@ class User extends CI_Controller {
             $data['email'] = $content->email;
             $data['dob'] = date("Y-m-d", strtotime($content->dob));
             $data['user_type'] = 'Member';
-            $data['created_by'] = 1;
             $data['password'] = $password;
             $data['profile_pic'] = 'user.png';
             $data['is_deleted'] = 0;
-            $user_id = $this->User_model->insertRow('users', $data);
+            $user_id = $this->User_model->create('users', $data);
             $data['user_id'] = $user_id;
-            unset($data['created_by']);
             unset($data['password']);
             unset($data['profile_pic']);
             unset($data['is_deleted']);
+            unset($data['hash']);
             echo str_replace(':null',':""',json_encode(array('result' => 'true','UserData' => $data)));
         }
         exit;
@@ -703,7 +686,6 @@ class User extends CI_Controller {
                         $data['status'] = $this->input->post('status');
                     }
                     //$data['token'] = $this->generate_token();
-                    $data['created_by'] = $this->user_id;
                     $data['password'] = $password;
                     $data['profile_pic'] = $profile_pic;
                     $data['is_deleted'] = 0;
@@ -714,7 +696,7 @@ class User extends CI_Controller {
                         unset($data['call_from']);
                     }
                     unset($data['submit']);
-                    $user_id = $this->User_model->insertRow('users', $data);
+                    $user_id = $this->User_model->create('users', $data);
                     $success = 'Successfully Registered..';
                     if($redirect == 'registration'){
                         redirect( base_url().'user/authentify/'.$user_id, 'refresh');
@@ -784,9 +766,8 @@ class User extends CI_Controller {
                             }
                             if ($emm) {
                                 $darr = array('email' => $mailValue, 'var_key' => $var_key);
-                                $this->User_model->insertRow('users', $darr);
+                                $this->User_model->create('users', $darr);
                                 $result['seccessCount'] += 1;
-                                ;
                             }
                         } else {
                             $result['existCount'] += 1;

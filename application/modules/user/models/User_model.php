@@ -1,5 +1,5 @@
 <?php
-class User_model extends CI_Model {       
+class User_model extends SYS_Model {       
     function __construct() {
         parent::__construct();
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->user_id : '1';
@@ -140,13 +140,6 @@ class User_model extends CI_Model {
         return $this->db->get('templates')->row();
     }
 
-    /**
-     * This function is used to Insert record in table  
-     */
-    public function insertRow($table, $data) {
-        $this->db->insert($table, $data);
-        return $this->db->insert_id();
-    }
 
     /**
      * This function is used to Update record in table  

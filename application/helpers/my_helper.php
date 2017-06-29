@@ -334,4 +334,50 @@
 		  file_put_contents($path.$filename, $CI->dompdf->output());
 		  return  $path.$filename;
 	  }*/
+          
+          /**
+     * simple_crypt()
+     *
+     * @param	string	$string
+     * @param	string	$action
+     * @return	string
+     */
+    function simple_crypt($string, $key, $action = 'e') {
+
+        $secret_iv = 'my_simple_secret_iv';
+        $output = false;
+        $encrypt_method = "AES-256-CBC";
+        $key = hash('sha256', $key);
+        $iv = substr(hash('sha256', $secret_iv), 0, 16);
+
+        if ($action == 'e') {
+            $output = base64_encode(openssl_encrypt($string, $encrypt_method, $key, 0, $iv));
+        } else if ($action == 'd') {
+            $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
+        }
+
+        return $output;
+    }
+    
+    function process_token($token = NULL){
+        $return = false;
+        if($token) {
+            $key = substr($token, strrpos($token, ':' )+1);
+            $crypt = str_replace(':'.$key,'',$token);
+            $email = simple_crypt($crypt, $key, 'd');
+            if(!empty($email)){
+                $CI = get_instance();
+	  	$CI->db->select('hash');
+	  	$CI->db->from('users');
+	  	$CI->db->where('email', $email);
+	  	$qr = $CI->db->get();
+	  	$result = $qr->result_array();
+                if(!empty($result)){
+                    $hash = $result[0]['hash'];
+                    $return = password_verify($email,$hash);
+                }
+            }
+        }
+        return $return;
+    }
 ?>
