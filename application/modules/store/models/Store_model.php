@@ -1,5 +1,5 @@
 <?php
-class Store_model extends CI_Model {       
+class Store_model extends SYS_Model {       
     function __construct() {
         parent::__construct();
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->user_id : '1';
