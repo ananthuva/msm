@@ -123,11 +123,15 @@ class User extends CI_Controller {
             $data['is_deleted'] = 0;
             $user_id = $this->User_model->create('users', $data);
             $data['user_id'] = $user_id;
+            $key = $this->randomString();
+            $token = simple_crypt($data['email'],$key); 
+            $hash = password_hash($data['email'], PASSWORD_DEFAULT);
+            $this->User_model->updateRow('users', 'user_id', $user_id, array('hash' => $hash));
             unset($data['password']);
             unset($data['profile_pic']);
             unset($data['is_deleted']);
             unset($data['hash']);
-            echo str_replace(':null',':""',json_encode(array('result' => 'true','UserData' => $data)));
+            echo str_replace(':null',':""',json_encode(array('result' => 'true','token' => $token.':'.$key,'UserData' => $data)));
         }
         exit;
     }

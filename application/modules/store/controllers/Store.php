@@ -9,13 +9,19 @@ class Store extends CI_Controller {
         $this->load->model('Store_model');
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->user_id : '1';
     }
-
-    /**
-     * This function is redirect to users profile page
+    
+     /**
+     * This function is used for show shop list
      * @return Void
      */
     public function index() {
-        if (is_login()) {
+        is_login();
+        if (CheckPermission("stores", "own_read")) {
+            $this->load->view('include/header');
+            $this->load->view('store_table');
+            $this->load->view('include/footer');
+        } else {
+            $this->session->set_flashdata('messagePr', 'You don\'t have permission to access.');
             redirect(base_url() . 'user/profile', 'refresh');
         }
     }
@@ -125,6 +131,87 @@ class Store extends CI_Controller {
             echo str_replace(':null',':""',json_encode(array('result' => 'true','StoreData' => $data)));
         }
         exit;
+    }
+    
+     /**
+     * This function is used for add a shop
+     * @return Void
+     */
+    public function createStores() {
+        is_login();
+        if (CheckPermission("stores", "own_create")) {
+            $this->load->view('include/header');
+            $this->load->view('add_store');
+            $this->load->view('include/footer');
+        } else {
+            $this->session->set_flashdata('messagePr', 'You don\'t have permission to access.');
+            redirect(base_url() . 'user/profile', 'refresh');
+        }
+    }
+    
+    /**
+     * This function is used to create datatable in users list page
+     * @return Void
+     */
+    public function getStoreList() {
+        is_login();
+        $table = 'stores';
+        $primaryKey = 'id';
+        $columns = array(
+            array('db' => 'id', 'dt' => 0), array('db' => 'is_active', 'dt' => 1),
+            array('db' => 'name', 'dt' => 2),
+            array('db' => 'license_no', 'dt' => 3),
+            array('db' => 'poc', 'dt' => 4),
+            array('db' => 'id', 'dt' => 5)
+        );
+
+        $sql_details = array(
+            'user' => $this->db->username,
+            'pass' => $this->db->password,
+            'db' => $this->db->database,
+            'host' => $this->db->hostname
+        );
+        $where = array("is_deleted != 1");
+        $output_arr = SSP::complex($_GET, $sql_details, $table, $primaryKey, $columns, $where);
+        
+        foreach ($output_arr['data'] as $key => $value) {
+            $id = $output_arr['data'][$key][count($output_arr['data'][$key]) - 1];
+            $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] = '';
+            if (CheckPermission($table, "all_update")) {
+                $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a id="btnEditRow" class="mClass"  href="javascript:;" type="button" title="View/Edit"><i class="fa fa-eye" data-id=""></i></a>';
+            } else if (CheckPermission($table, "own_update") && (CheckPermission($table, "all_update") != true)) {
+                $user_id = getRowByTableColomId($table, $id, 'user_id', 'user_id');
+                if ($user_id == $this->user_id) {
+                    $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a id="btnEditRow" class="mClass"  href="javascript:;" type="button" title="View/Edit"><i class="fa fa-eye" data-id=""></i></a>';
+                }
+            }
+
+            if (CheckPermission($table, "all_delete")) {
+                $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a style="cursor:pointer;" class="mClass" data-toggle="modal" onclick="setId(' . $id . ', \'store\')" data-target="#cnfrm_delete" title="delete"><i class="fa fa-trash-o" ></i></a>';
+            } else if (CheckPermission($table, "own_delete") && (CheckPermission($table, "all_delete") != true)) {
+                $user_id = getRowByTableColomId($table, $id, 'user_id', 'user_id');
+                if ($user_id == $this->user_id) {
+                    $output_arr['data'][$key][count($output_arr['data'][$key]) - 1] .= '<a style="cursor:pointer;" class="mClass" data-toggle="modal" onclick="setId(' . $id . ', \'store\')" data-target="#cnfrm_delete" title="delete"><i class="fa fa-trash-o" ></i></a>';
+                }
+            }
+            $output_arr['data'][$key][0] = '<input type="checkbox" name="selData" value="' . $output_arr['data'][$key][0] . '">';
+        }
+
+        echo json_encode($output_arr);
+    }
+    
+    /**
+     * This function is used to delete stores
+     * @return Void
+     */
+    public function delete($id) {
+        is_login();
+        $ids = explode('-', $id);
+        foreach ($ids as $id) {
+            $this->Store_model->delete($id);
+        }
+        $this->session->set_flashdata('messagePr', 'Deleted Successfully');
+        redirect(base_url() . 'store', 'refresh');
     }
     
 }

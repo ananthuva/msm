@@ -18,12 +18,13 @@ class Store_model extends SYS_Model {
     }
 
     /**
-     * This function is used to delete user
+     * This function is used to delete stores
      * @param: $id - id of user table
      */
     function delete($id = '') {
-        $this->db->where('user_id', $id);
-        $this->db->delete('users');
+        $data = array('is_deleted'=>1);
+        $this->db->where('id', $id);
+        $this->db->update('stores', $data);
     }
 
 

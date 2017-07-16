@@ -11,24 +11,23 @@
       <div class="col-xs-12">
         <div class="box box-success">
           <div class="box-header with-border">
-            <h3 class="box-title">User</h3>
+            <h3 class="box-title">Stores List</h3>
             <div class="box-tools">
-              <?php if(CheckPermission("users", "own_create")){ ?>
-              <button type="button" class="btn-sm  btn btn-success modalButtonUser" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Add User</button>
-              <?php } if(setting_all('email_invitation') == 1){  ?>
-              <button type="button" class="btn-sm  btn btn-success InviteUser" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Invite People</button>
+              <?php if(CheckPermission("stores", "own_create")){ ?>
+              <button type="button" onclick="location.href='<?php echo base_url();?>store/createStores'" class="btn-sm  btn btn-success"><i class="glyphicon glyphicon-plus"></i> Add Shop</button>
               <?php } ?>
             </div>
           </div>
           <!-- /.box-header -->
           <div class="box-body">           
-            <table id="example1" class="cell-border example1 table table-striped table1 delSelTable">
+            <table id="stores" class="cell-border example1 table table-striped table1 delSelTable">
               <thead>
                 <tr>
                   <th><input type="checkbox" class="selAll"></th>
                   <th>Status</th>
                   <th>Name</th>
-		  <th>Email</th>
+		  <th>License No</th>
+                  <th>Commission %</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -45,34 +44,30 @@
     <!-- /.row -->
   </section>
   <!-- /.content -->
-</div>  
-<!-- Modal Crud Start-->
-<div class="modal fade" id="nameModal_user" role="dialog">
-  <div class="modal-dialog">
-    <div class="box box-primary popup" >
-      <div class="box-header with-border formsize">
-        <h3 class="box-title">User Form</h3>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-      </div>
-      <!-- /.box-header -->
-      <div class="modal-body" style="padding: 0px 0px 0px 0px;"></div>
-    </div>
-  </div>
-</div><!--End Modal Crud --> 
+</div> 
+<div class="modal-body" style="padding: 0px 0px 0px 0px;"></div>
 <script type="text/javascript">
   $(document).ready(function() {  
     var url = '<?php echo base_url();?>';//$('.content-header').attr('rel');
-    var table = $('#example1').DataTable({ 
+    var table = $('#stores').DataTable({ 
           dom: 'lfBrtip',
           buttons: [
               'copy', 'excel', 'pdf', 'print'
           ],
           "aoColumnDefs": [
-            { 'bSortable': false, 'aTargets': [ 0 ] }
+            { 'bSortable': false, 'aTargets': [ 0 ] },
+            {"mRender": function (data) {
+                    if(data == 1)
+                        return 'Active';
+                    else
+                        return 'Disabled';
+                }, 'aTargets': [ 1 ]
+            },
+            {'bSortable': false, 'aTargets': [ 5 ]},
            ] ,
           "processing": true,
           "serverSide": true,
-          "ajax": url+"user/dataTable",
+          "ajax": url+"store/getStoreList",
           "sPaginationType": "full_numbers",
           "language": {
             "search": "_INPUT_", 
@@ -92,7 +87,7 @@
       var add_width = $('.dataTables_filter').width()+$('.box-body .dt-buttons').width()+10;
       $('.table-date-range').css('right',add_width+'px');
 
-        $('.dataTables_info').before('<button data-base-url="<?php echo base_url().'user/delete/'; ?>" rel="delSelTable" class="btn btn-default btn-sm delSelected pull-left btn-blk-del"> <i class="fa fa-trash"></i> </button><br><br>');  
+        $('.dataTables_info').before('<button data-base-url="<?php echo base_url().'store/delete/'; ?>" rel="delSelTable" class="btn btn-default btn-sm delSelected pull-left btn-blk-del"> <i class="fa fa-trash"></i> </button><br><br>');  
     }, 300);
     $("button.closeTest, button.close").on("click", function (){});
   });

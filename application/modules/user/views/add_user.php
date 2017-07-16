@@ -143,4 +143,5 @@
                 <button type="submit" name="submit" value="add" class="btn btn-success wdt-bg">Add</button>
             </div>
         <?php } ?>
+    </div>
 </form>
