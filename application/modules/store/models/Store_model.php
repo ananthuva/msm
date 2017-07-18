@@ -40,6 +40,18 @@ class Store_model extends SYS_Model {
         $query = $this->db->get();
         return $query->result();
     }
+    /**
+     * This function is used to select data form table  
+     */
+    function getStoreUsers() {
+        $this->db->where('user_type', 'pharmasist');
+        $this->db->where('is_deleted', '0');
+        $this->db->where('status', 'active');
+        $this->db->select('CONCAT_WS(" ",name,lname ) AS user_name,user_id');
+        $this->db->from('users');
+        $query = $this->db->get();
+        return $query->result();
+    }
 
 
     /**
@@ -72,6 +84,8 @@ class Store_model extends SYS_Model {
         if(!empty($col2)){
             $this->db->where($col2, $col2Val);
         }
+        $this->db->set('last_modified_on', 'NOW()', FALSE);
+        $data['last_modified_by'] = $this->user_id ;
         $this->db->update($table, $data);
         return $this->db->affected_rows();
     }

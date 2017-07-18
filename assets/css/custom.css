@@ -589,3 +589,8 @@ th.showRolesPermission {
 	line-height: 21px;
 	text-align: center;
 }
+@media (max-width: 992px) {
+    .clear-pad {
+        min-height: 10px;
+    }
+}
