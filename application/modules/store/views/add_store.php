@@ -101,7 +101,7 @@
                                 <input required type="text" name="poc" value="<?php echo isset($storeData->poc) ? $storeData->poc : ''; ?>" class="form-control" placeholder="Percent of Commission">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 hidden">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -121,11 +121,12 @@
                                 <label for="agreement">Agreement Upload</label>
                                 <div class="pic_size" id="agreement-holder"> 
                                     <?php
-                                    if (isset($storeData->agreement)) {
+                                    if (isset($storeData->agreement) && !empty($storeData->agreement)) {
                                         $agreements = explode(",", $storeData->agreement);
                                         foreach($agreements as $agreement) {
                                             if(file_exists('uploads/agreement/' . $agreement)) { ?>
-                                    <a href="<?php echo base_url().'uploads/agreement/'.$agreement?>"><?php echo $agreement; ?></a> <br>
+                                    <a target="_blank" download="<?php echo base_url().'uploads/agreement/'.$agreement?>" href="<?php echo base_url().'uploads/agreement/'.$agreement?>"><span class="no-wrap"><?php echo $agreement; ?></span></a> &nbsp;
+                                    <a style="cursor:pointer;" class="mClass" data-toggle="modal" onclick="deleteAttachment('<?php echo $agreement; ?>','<?php echo $storeData->id; ?>')" data-target="#cnfrm_delete" title="delete"><i class="fa fa-trash-o" ></i></a><br>
                                     <?php   }
                                         }
                                     } 
@@ -270,6 +271,11 @@
                 }
             });
         }
+    }
+    
+    function deleteAttachment(name,id) {
+        var url =  $('body').attr('data-base-url');
+        $("#cnfrm_delete").find("a.yes-btn").attr("href",base_url+"/store/deleteAgreement/"+id+"/"+name);
     }
 </script>
 <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyB9DLk0VCJClmscd0bORll_mQuXk_R7HKo" type="text/javascript"></script>

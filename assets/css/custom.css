@@ -594,3 +594,13 @@ th.showRolesPermission {
         min-height: 10px;
     }
 }
+.pic_size .fa-trash-o {
+    color: #ff5b5b;
+}
+.no-wrap {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 52%;
+}
+

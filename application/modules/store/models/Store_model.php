@@ -26,16 +26,43 @@ class Store_model extends SYS_Model {
         $this->db->where('id', $id);
         $this->db->update('stores', $data);
     }
+    
+    /**
+     * This function is used to delete agreement
+     * @param: $id - id of user table
+     */
+    function deleteAgreement($id,$name) {
+        $this->db->where('id', $id);
+        $this->db->select('agreement');
+        $this->db->from('stores');
+        $result = $this->db->get()->row();
+        if(!empty($result)){
+            $agreement = $result->agreement;
+            $agreement = explode(',',$agreement);
+            while(($i = array_search($name, $agreement)) !== false) {
+                unset($agreement[$i]);
+            }
+            $agreement = implode(',',$agreement);
+            $this->db->where('id', $id);
+            $this->db->update('stores', array('agreement'=>$agreement));
+            return true;
+        }
+        return false;
+    }
 
 
     /**
      * This function is used to select data form table  
      */
-    function get_data_by($tableName = '', $value = '', $colum = '') {
+    function get_data_by($tableName = '', $value = '', $colum = '',$select = '') {
         if ((!empty($value)) && (!empty($colum))) {
             $this->db->where($colum, $value);
         }
-        $this->db->select('*');
+        if(empty($select)) {
+            $this->db->select('*');
+        } else {
+            $this->db->select($select);
+        }
         $this->db->from($tableName);
         $query = $this->db->get();
         return $query->result();

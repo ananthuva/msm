@@ -233,6 +233,12 @@ class Store extends CI_Controller {
             }
             $agreements = implode(',', $files);
             if(!empty($agreements)) {
+                if(!empty($id)) {
+                    $agr = $this->Store_model->get_data_by('stores', $id, 'id', 'agreement');
+                    if(isset($agr[0]->agreement) && !empty($agr[0]->agreement)) {
+                        $agreements = $agr[0]->agreement.','.$agreements;
+                    }
+                }
                 $data['agreement'] = $agreements;
             }
             
@@ -287,7 +293,7 @@ class Store extends CI_Controller {
         $tmpname = $file['tmp_name'];
         $exp = explode('.', $filename);
         $ext = end($exp);
-        $newname = str_replace(',', '', $exp[0]) . '_' . time() . "." . $ext;
+        $newname = str_replace(',', '', $exp[0]) . '_' . time(). mt_rand(1,100) . "." . $ext;
         if (!file_exists('uploads/agreement')) {
             mkdir('uploads/agreement', 0777, true);
         }
@@ -363,6 +369,21 @@ class Store extends CI_Controller {
         }
         $this->session->set_flashdata('messagePr', 'Deleted Successfully');
         redirect(base_url() . 'store', 'refresh');
+    }
+    /**
+     * This function is used to delete Agreement
+     * @return Void
+     */
+    public function deleteAgreement($id,$name) {
+        is_login();
+        $delete = $this->Store_model->deleteAgreement($id,$name);
+        if($delete){
+            unlink('uploads/agreement/'.$name);
+            $this->session->set_flashdata('messagePr', 'Deleted Successfully');
+        } else {
+            $this->session->set_flashdata('messagePr', 'Unable to delete');
+        }
+        redirect(base_url() . 'store/editStores/'.$id, 'refresh');
     }
 
 }
