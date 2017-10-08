@@ -43,7 +43,7 @@
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
         <script>
-            var base_url = '<?php echo base_url();?>';
+            var base_url = '<?php echo base_url(); ?>';
         </script>
 
     </head>
@@ -98,7 +98,7 @@
                 <!-- sidebar: style can be found in sidebar.less -->
                 <section class="sidebar">
 
-                    <ul class="sidebar-menu">
+                    <ul class="sidebar-menu tree">
                         <li class="header"><!-- MAIN NAVIGATION --></li>
                         <?php // echo '<pre>';print_r($this->router); die; ?>
                         <li class="<?= ($this->router->method === "profile") ? "active" : "not-active" ?>"> 
@@ -116,10 +116,22 @@
                                 <a href="<?php echo base_url("setting"); ?>"><i class="fa fa-cogs"></i> <span>Settings</span></a>
                             </li>
                         <?php } ?>
-                        <?php if (isset($this->session->userdata('user_details')[0]->user_type) && ($this->session->userdata('user_details')[0]->user_type == 'member' || 
-                                    $this->session->userdata('user_details')[0]->user_type == 'admin' )) { ?>
-                            <li class="<?php echo ($this->router->class==="store")?"active":"not-active" ?>">
-                                <a href="<?php echo base_url("store");  ?>"><i class="fa fa-cubes"></i> <span>Medical Stores</span></a>
+                        <?php if (isset($this->session->userdata('user_details')[0]->user_type) && ($this->session->userdata('user_details')[0]->user_type == 'member' ||
+                                $this->session->userdata('user_details')[0]->user_type == 'admin' )) {
+                            ?>
+                            <li class="treeview <?php echo ($this->router->class === "store") ? "active" : "not-active" ?>">
+                                <a href="#"><i class="fa fa-cubes"></i> <span>Medical Stores</span>
+                                    <span class="pull-right-container">
+                                        <i class="fa fa-angle-left pull-right"></i>
+                                    </span></a>
+                                <ul class="treeview-menu" style="display: block;">
+                                    <li class="<?php echo ($this->router->method === "index") ? "active" : "" ?>">
+                                        <a href="<?php echo base_url("store"); ?>"><i class="fa fa-cubes"></i>Manage Stores</a>
+                                    </li>
+                                    <li class="<?php echo ($this->router->method === "searchStoresMap") ? "active" : "" ?>">
+                                        <a href="<?php echo base_url("store/searchStoresMap"); ?>"><i class="fa fa-cubes"></i>Location Filter Stores</a>
+                                    </li>
+                                </ul>
                             </li>
                         <?php }
                         /* if(CheckPermission("invoice", "own_read")){ ?>   
@@ -127,7 +139,8 @@
                           <a href="<?php echo base_url("invoice/view"); ?>"><i class="fa fa-list-alt"></i> <span>Invoice</span></a>
                           </li>
 
-                          <?php  } */ ?>
+                          <?php  } */
+                        ?>
 
                         <li class="<?= ($this->router->class === "about") ? "active" : "not-active" ?>">
                             <a href="<?php echo base_url("about"); ?>"><i class="fa fa-info-circle"></i> <span>About Us</span></a>

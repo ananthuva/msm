@@ -116,5 +116,17 @@ class Store_model extends SYS_Model {
         $this->db->update($table, $data);
         return $this->db->affected_rows();
     }
+    
+    public function getAllStores(){
+        $this->db->where('is_deleted', 0);
+        $this->db->where('is_active', 1);
+        $this->db->select('s.id, s.name, s.latitude as lat, s.longitude as lng, s.address, d.name as city,'
+                . ' st.name as state, s.postal, s.contact_number_1 as phone');
+        $this->db->from('stores s');
+        $this->db->join('district d','s.district_id = d.id','left');
+        $this->db->join('state st','s.state_id = st.id','left');
+        $query = $this->db->get();
+        return $query->result();
+    }
 
 }

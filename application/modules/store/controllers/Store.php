@@ -385,5 +385,43 @@ class Store extends CI_Controller {
         }
         redirect(base_url() . 'store/editStores/'.$id, 'refresh');
     }
+    
+    /**
+     * This function is used to search Stores with google map
+     * @return Void
+     */
+    public function searchStoresMap() {
+        is_login();
+        $this->load->view('include/header');
+        $this->load->view('storeLocator');
+        $this->load->view('include/footer');
+    }
+    
+    /**
+     * This function is used to get List of Stores
+     * @return Void
+     */
+    public function getStoresMap() {
+        is_login();
+        $stores = $this->Store_model->getAllStores();
+        echo json_encode($stores); 
+        /*echo '[{
+        "id": "1",
+        "name": "Chipotle Minneapolis",
+        "lat": "44.947464",
+        "lng": "-93.320826",
+        "address": "3040 Excelsior Blvd",
+        "address2": "",
+        "city": "Minneapolis",
+        "state": "MN",
+        "postal": "55416",
+        "phone": "612-922-6662",
+        "web": "http:\/\/www.chipotle.com",
+        "hours1": "Mon-Sun 11am-10pm",
+        "hours2": "",
+        "hours3": ""
+    }]';*/
+        exit;
+    }
 
 }

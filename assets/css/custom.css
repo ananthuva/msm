@@ -603,4 +603,25 @@ th.showRolesPermission {
     overflow: hidden;
     width: 52%;
 }
-
+.sidebar-menu > li.active > a {
+	border-left-color: #3c8dbc;
+}
+.sidebar-menu .treeview .treeview-menu > li.active > a {
+	font-weight: normal;
+}
+@media (min-width: 992px) {
+    .w57 {
+        width: 57%;
+    }
+    .w100 {
+        width: 100%;
+    }
+}
+@media (max-width: 992px) {
+    .w57 {
+        width: 100%;
+    }
+    .w100 {
+        width: auto;
+    }
+}
