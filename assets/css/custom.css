@@ -625,3 +625,11 @@ th.showRolesPermission {
         width: auto;
     }
 }
+.inline-77{
+    width: 82% !important;
+    display: inline-block !important;
+}
+.pointer {
+    cursor: pointer;
+    z-index: 1;
+}

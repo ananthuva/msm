@@ -21,13 +21,13 @@ class SSP {
     static function data_output ( $columns, $data, $isJoin = false )
     {
         $out = array();
-
+        
         for ( $i=0, $ien=count($data) ; $i<$ien ; $i++ ) {
             $row = array();
-
+            
             for ( $j=0, $jen=count($columns) ; $j<$jen ; $j++ ) {
                 $column = $columns[$j];
-
+                
                 // Is there a formatter?
                 if ( isset( $column['formatter'] ) ) {
                     $row[ $column['dt'] ] = ($isJoin) ? $column['formatter']( $data[$i][ $column['field'] ], $data[$i] ) : $column['formatter']( $data[$i][ $column['db'] ], $data[$i] );
@@ -36,10 +36,10 @@ class SSP {
                     $row[ $column['dt'] ] = ($isJoin) ? $data[$i][ $columns[$j]['field'] ] : $data[$i][ $columns[$j]['db'] ];
                 }
             }
-
+            
             $out[] = $row;
         }
-
+        
         return $out;
     }
 
@@ -200,64 +200,61 @@ class SSP {
      *  @return array  Server-side processing response array
      *  @ Modifiction By banarsiamin 30-11-2016
      */
-    static function simple ( $request, $sql_details, $table, $primaryKey, $columns, $joinQuery = NULL, $extraWhere = '', $groupBy = '')
+        static function simple ( $request, $sql_details, $table, $primaryKey, $columns, $joinQuery = NULL, $extraWhere = '', $groupBy = '', $having = '')
     {
         $bindings = array();
         $db = SSP::sql_connect( $sql_details );
-
+        
         // Build the SQL query string from the request
         $limit = SSP::limit( $request, $columns );
         $order = SSP::order( $request, $columns, $joinQuery );
         $where = SSP::filter( $request, $columns, $bindings, $joinQuery );
-
-
-        // IF Extra where set then set and prepare query
-        if($extraWhere != '') {
+        
+        
+		// IF Extra where set then set and prepare query
+        if($extraWhere)
             $extraWhere = ($where) ? ' AND '.$extraWhere : ' WHERE '.$extraWhere;
-        }
-
-        
-        if($groupBy != '') {
-            $groupBy = ($groupBy) ? ' GROUP BY '.$groupBy .' ' : '';
-        }
-        
+        $groupBy = ($groupBy) ? ' GROUP BY '.$groupBy .' ' : '';
+        $having = ($having) ? ' HAVING '.$having .' ' : '';
         // Main query to actually get the data
         if($joinQuery){
             $col = SSP::pluck($columns, 'db', $joinQuery);
             $query =  "SELECT SQL_CALC_FOUND_ROWS ".implode(", ", $col)."
-             $joinQuery
-             $where
-             $extraWhere
-             $groupBy
-             $order
-             $limit";
+			 $joinQuery
+			 $where
+			 $extraWhere
+			 $groupBy
+                         $having
+			 $order
+			 $limit";
         }else{
             $query =  "SELECT SQL_CALC_FOUND_ROWS `".implode("`, `", SSP::pluck($columns, 'db'))."`
-             FROM `$table`
-             $where
-             $extraWhere
-             $groupBy
-             $order
-             $limit";
+			 FROM `$table`
+			 $where
+			 $extraWhere
+			 $groupBy
+                         $having
+			 $order
+			 $limit";
         }
-
+        
         
         $data = SSP::sql_exec( $db, $bindings,$query);
-
+        
         // Data set length after filtering
         $resFilterLength = SSP::sql_exec( $db,
             "SELECT FOUND_ROWS()"
         );
         $recordsFiltered = $resFilterLength[0][0];
-
+        
         // Total data set length
         $resTotalLength = SSP::sql_exec( $db,
             "SELECT COUNT(`{$primaryKey}`)
-             FROM   `$table`"
+			 FROM   `$table`"
         );
         $recordsTotal = $resTotalLength[0][0];
-
-
+        
+        
         /*
          * Output
          */
@@ -314,6 +311,60 @@ class SSP {
 
             $whereAllSql = 'WHERE '.$whereAll;
         }
+
+        if(isset($request['filter_option']) && !empty($request['filter_option'])) {
+            switch($request['filter_option']){
+                case 'new_usr' :
+                    if(empty($order)) {
+                        $order = "ORDER BY `created_on` DESC";
+                    }
+                    break;
+                case 'new_reg' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `is_registered` = 1".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `created_on` DESC";
+                    }
+                    break;
+                case 'all_reg' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `is_registered` = 1".$where;
+                    break;
+                case 'pur_usr' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `is_purchased` = 1".$where;
+                    break;
+                case 'fre_pur_usr' :
+                    if(!empty($where)) {
+                        $cond = ltrim($where,"WHERE ");
+                        $cond = " AND ".$cond;
+                    }
+                    $where = "WHERE `is_purchased` = 1";
+                    if(!empty($request['filter_start'])){
+                        $where .= " AND DATE(`last_purchased_on`) >= '".date("Y-m-d", strtotime($request['filter_start']) )."'";
+                    }
+                    if(!empty($request['filter_end'])){
+                        $where .= " AND DATE(`last_purchased_on`) <= '".date("Y-m-d", strtotime($request['filter_end']) )."'";
+                    }
+                    $where .= $cond;
+                    if(empty($order)) {
+                        $order = "ORDER BY `purchase_count` DESC";
+                    }
+                    break;
+                default: 
+                    break;
+            }
+        }
+        
         // Main query to actually get the data
         $data = SSP::sql_exec( $db, $bindings,
             "SELECT `".implode("`, `", SSP::pluck($columns, 'db'))."`
@@ -322,7 +373,7 @@ class SSP {
              $order
              $limit"
         );
-
+        
         // Data set length after filtering
         $resFilterLength = SSP::sql_exec( $db, $bindings,
             "SELECT COUNT(`{$primaryKey}`)

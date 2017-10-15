@@ -15,7 +15,13 @@ class Order extends CI_Controller {
      * @return Void
      */
     public function index() {
-        if (is_login()) {
+        is_login();
+        if (CheckPermission("orders", "own_read")) {
+            $this->load->view('include/header');
+            $this->load->view('order_table');
+            $this->load->view('include/footer');
+        } else {
+            $this->session->set_flashdata('messagePr', 'You don\'t have permission to access.');
             redirect(base_url() . 'user/profile', 'refresh');
         }
     }
@@ -218,6 +224,41 @@ class Order extends CI_Controller {
             }
         }
         return $error_upload;
+    }
+
+    /**
+     * This function is used to create datatable in order list page
+     * @return Void
+     */
+    public function dataTable() {
+        is_login();
+        $table = 'order';
+        $primaryKey = 'id';
+
+        $joinQuery = "FROM `order` AS `o` LEFT JOIN `users` AS `u` ON (`u`.`user_id`=`o`.`user_id`)"
+                . " LEFT JOIN `stores` AS `s` ON (`s`.`id`=`o`.`store_id`)";
+        $columns = array(
+            array('db' => '`o`.`id`', 'dt' => 0, 'field' => 'id'),
+            array('db' => '`u`.`name`', 'dt' => 1, 'field' => 'name'),
+            array('db' => '`s`.`name`', 'dt' => 2, 'field' => 'store_name', 'as' => 'store_name'),
+            array('db' => '`o`.`order_date`', 'dt' => 3, 'field' => 'order_date'),
+            array('db' => '`o`.`status`', 'dt' => 4, 'field' => 'status')
+        );
+
+        $sql_details = array(
+            'user' => $this->db->username,
+            'pass' => $this->db->password,
+            'db' => $this->db->database,
+            'host' => $this->db->hostname
+        );
+
+        $output_arr = SSP::simple($_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery);
+        foreach ($output_arr['data'] as $key => $value) {
+            $output_arr['data'][$key][0] = '<input type="checkbox" name="selData" value="' . $output_arr['data'][$key][0] . '">';
+            $output_arr['data'][$key][3] = date("d-m-Y", strtotime($output_arr['data'][$key][3]) );
+        }
+
+        echo json_encode($output_arr);
     }
 
 }

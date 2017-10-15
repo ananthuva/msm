@@ -116,31 +116,33 @@
                                 <a href="<?php echo base_url("setting"); ?>"><i class="fa fa-cogs"></i> <span>Settings</span></a>
                             </li>
                         <?php } ?>
-                        <?php if (isset($this->session->userdata('user_details')[0]->user_type) && ($this->session->userdata('user_details')[0]->user_type == 'member' ||
+                        <?php
+                        if (isset($this->session->userdata('user_details')[0]->user_type) && ($this->session->userdata('user_details')[0]->user_type == 'member' ||
                                 $this->session->userdata('user_details')[0]->user_type == 'admin' )) {
                             ?>
                             <li class="treeview <?php echo ($this->router->class === "store") ? "active" : "not-active" ?>">
-                                <a href="#"><i class="fa fa-cubes"></i> <span>Medical Stores</span>
+                                <a href="#"><i class="fa fa-building-o"></i> <span>Medical Stores</span>
                                     <span class="pull-right-container">
                                         <i class="fa fa-angle-left pull-right"></i>
                                     </span></a>
                                 <ul class="treeview-menu" style="display: block;">
                                     <li class="<?php echo ($this->router->method === "index") ? "active" : "" ?>">
-                                        <a href="<?php echo base_url("store"); ?>"><i class="fa fa-cubes"></i>Manage Stores</a>
+                                        <a href="<?php echo base_url("store"); ?>"><i class="fa fa-sliders"></i>Manage Stores</a>
                                     </li>
                                     <li class="<?php echo ($this->router->method === "searchStoresMap") ? "active" : "" ?>">
-                                        <a href="<?php echo base_url("store/searchStoresMap"); ?>"><i class="fa fa-cubes"></i>Location Filter Stores</a>
+                                        <a href="<?php echo base_url("store/searchStoresMap"); ?>"><i class="fa fa-map-marker"></i>Location Filter Stores</a>
                                     </li>
                                 </ul>
                             </li>
-                        <?php }
-                        /* if(CheckPermission("invoice", "own_read")){ ?>   
-                          <li class="<?=($this->router->class==="invoice")?"active":"not-active"?>">
-                          <a href="<?php echo base_url("invoice/view"); ?>"><i class="fa fa-list-alt"></i> <span>Invoice</span></a>
-                          </li>
-
-                          <?php  } */
-                        ?>
+                        <?php
+                        }
+                        if (isset($this->session->userdata('user_details')[0]->user_type) && ($this->session->userdata('user_details')[0]->user_type == 'member' ||
+                                $this->session->userdata('user_details')[0]->user_type == 'admin' )) {
+                            ?>
+                            <li class="treeview <?php echo ($this->router->class === "order") ? "active" : "not-active" ?>">
+                                <a href="<?php echo base_url(); ?>order"><i class="fa fa-book"></i> <span>Order History</span>
+                            </li>
+                        <?php } ?>
 
                         <li class="<?= ($this->router->class === "about") ? "active" : "not-active" ?>">
                             <a href="<?php echo base_url("about"); ?>"><i class="fa fa-info-circle"></i> <span>About Us</span></a>

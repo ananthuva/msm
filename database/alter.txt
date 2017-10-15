@@ -1,1 +1,9 @@
 ALTER TABLE `stores` ADD COLUMN `is_deleted` TINYINT(1) DEFAULT '0' NULL AFTER `is_active`;
+ALTER TABLE `users`     ADD COLUMN `is_registered` TINYINT(1) DEFAULT '0' NULL AFTER `user_type`, 
+    ADD COLUMN `is_purchased` TINYINT(1) DEFAULT '0' NULL AFTER `is_registered`;
+ALTER TABLE `users`     ADD COLUMN `purchase_count` INT(121) NULL AFTER `is_purchased`,    
+    ADD COLUMN `last_purchased_on` DATETIME DEFAULT '0000-00-00 00:00:00' NULL AFTER `purchase_count`;
+ALTER TABLE `order`  CHANGE `status` `status` ENUM('Send Prescription','Get Quote','Confirmed Order','Done Payment','Deliverd') 
+   CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT 'Send Prescription' NULL ;
+
+/******************************************************************************************/
