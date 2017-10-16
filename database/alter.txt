@@ -7,3 +7,33 @@ ALTER TABLE `order`  CHANGE `status` `status` ENUM('Send Prescription','Get Quot
    CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT 'Send Prescription' NULL ;
 
 /******************************************************************************************/
+
+CREATE TABLE `support_ticket` (
+  `ticket_id` int(21) unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_number` varchar(60) NOT NULL,
+  `subject` text NOT NULL,
+  `description` text,
+  `created_by` int(21) DEFAULT NULL,
+  `created_on` datetime DEFAULT '0000-00-00 00:00:00',
+  `read_status` tinyint(1) DEFAULT '0',
+  `status` enum('open','closed','hold') DEFAULT 'open',
+  `priority` enum('low','high','medium') DEFAULT 'low',
+  `closed_by` int(21) DEFAULT NULL,
+  `closed_on` datetime DEFAULT NULL,
+  PRIMARY KEY (`ticket_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+CREATE TABLE `support_ticke_message` (
+  `ticket_message_id` int(21) unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_id` int(21) NOT NULL,
+  `content` text NOT NULL,
+  `read_status` tinyint(1) NOT NULL DEFAULT '0',
+  `reply_to` int(21) NOT NULL DEFAULT '0',
+  `created_by` int(21) NOT NULL,
+  `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ticket_message_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+
+ALTER TABLE `users`  CHANGE `dob` `dob` DATE NULL ,   CHANGE `last_purchased_on` `last_purchased_on` DATETIME NULL ;
+
+/**************************************************************************/

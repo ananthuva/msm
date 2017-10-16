@@ -139,10 +139,13 @@
                         if (isset($this->session->userdata('user_details')[0]->user_type) && ($this->session->userdata('user_details')[0]->user_type == 'member' ||
                                 $this->session->userdata('user_details')[0]->user_type == 'admin' )) {
                             ?>
-                            <li class="treeview <?php echo ($this->router->class === "order") ? "active" : "not-active" ?>">
-                                <a href="<?php echo base_url(); ?>order"><i class="fa fa-book"></i> <span>Order History</span>
+                            <li class="<?php echo ($this->router->class === "order") ? "active" : "not-active" ?>">
+                                <a href="<?php echo base_url(); ?>order"><i class="fa fa-book"></i> <span>Order History</span></a>
                             </li>
-                        <?php } ?>
+                        <?php }  ?>
+                            <li class="t<?php echo ($this->router->class === "ticket") ? "active" : "not-active" ?>">
+                                <a href="<?php echo base_url(); ?>ticket"><i class="fa fa-ticket"></i> <span>Support Tickets</span></a>
+                            </li>
 
                         <li class="<?= ($this->router->class === "about") ? "active" : "not-active" ?>">
                             <a href="<?php echo base_url("about"); ?>"><i class="fa fa-info-circle"></i> <span>About Us</span></a>
