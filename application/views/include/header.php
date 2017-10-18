@@ -143,7 +143,7 @@
                                 <a href="<?php echo base_url(); ?>order"><i class="fa fa-book"></i> <span>Order History</span></a>
                             </li>
                         <?php }  ?>
-                            <li class="t<?php echo ($this->router->class === "ticket") ? "active" : "not-active" ?>">
+                            <li class="<?php echo ($this->router->class === "ticket") ? "active" : "not-active" ?>">
                                 <a href="<?php echo base_url(); ?>ticket"><i class="fa fa-ticket"></i> <span>Support Tickets</span></a>
                             </li>
 
