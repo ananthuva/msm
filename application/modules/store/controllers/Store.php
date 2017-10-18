@@ -32,7 +32,7 @@ class Store extends CI_Controller {
      */
     public function ws_api() {
         if (strcasecmp($_SERVER['REQUEST_METHOD'], 'POST') != 0) {
-            echo json_encode(array('result' => 'false', 'error' => 'Request method must be POST!'));
+            echo json_encode(array('status' => 'false', 'message' => 'Request method must be POST!'));
             exit;
         }
         $content = json_decode(file_get_contents("php://input"));
@@ -40,11 +40,11 @@ class Store extends CI_Controller {
             if (process_token($_SERVER['HTTP_TOKEN'])) {
                 $this->process_ws_api();
             } else {
-                echo json_encode(array('result' => 'false', 'error' => 'Invalid Request Token'));
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid Request Token'));
                 exit;
             }
         } else {
-            echo json_encode(array('result' => 'false', 'error' => 'Unauthorized Request'));
+            echo json_encode(array('status' => 'false', 'message' => 'Unauthorized Request'));
             exit;
         }
     }
@@ -60,10 +60,10 @@ class Store extends CI_Controller {
                     break;
                 case 'create_stores' : $this->ws_createStores();
                     break;
-                default: echo json_encode(array('result' => 'false', 'error' => 'Request syntax error'));
+                default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
         } else {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid call'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid call'));
         }
         exit;
     }
@@ -79,12 +79,12 @@ class Store extends CI_Controller {
             $_POST['longitude'] = $content->longitude;
             $return = $this->Store_model->getNearbyStores();
             if (empty($return)) {
-                echo json_encode(array('result' => 'false', 'error' => 'No stores found'));
+                echo json_encode(array('status' => 'false', 'message' => 'No stores found'));
             } else {
-                echo str_replace(':null', ':""', json_encode(array('result' => 'true', 'StoreData' => $return)));
+                echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'Data' => $return)));
             }
         } else {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid latitude or longitude'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid latitude or longitude'));
         }
         exit;
     }
@@ -92,28 +92,28 @@ class Store extends CI_Controller {
     public function ws_createStores() {
         $content = json_decode(file_get_contents("php://input"));
         if (empty($content->name)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid name'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid name'));
         } else if (empty($content->address)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid address'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid address'));
         } else if (empty($content->license_no)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid license no'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid license no'));
         } else if (empty($content->poc)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid percent of commission'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid percent of commission'));
         } else if (empty($content->user_id)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid user'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid user'));
         } else if (empty($content->city_id)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid city'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid city'));
         } else if (empty($content->state_id)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid state'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid state'));
         } else if (empty($content->latitude)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid latitude'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid latitude'));
         } else if (empty($content->longitude)) {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid longitude'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid longitude'));
         } else {
 
 //            $checkValue = $this->User_model->check_exists('users', 'email', $content->email);
 //            if ($checkValue == false) {
-//                echo json_encode(array('result' => 'false','error' => 'Email Already Registered'));
+//                echo json_encode(array('status' => 'false','message' => 'Email Already Registered'));
 //                exit;
 //            }
             $data['is_active'] = 1;
@@ -133,7 +133,7 @@ class Store extends CI_Controller {
             unset($data['last_modified_by']);
             unset($data['created_on']);
             unset($data['last_modified_on']);
-            echo str_replace(':null', ':""', json_encode(array('result' => 'true', 'StoreData' => $data)));
+            echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'Data' => $data)));
         }
         exit;
     }

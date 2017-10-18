@@ -32,21 +32,22 @@ class Order extends CI_Controller {
      */
     public function ws_api() {
         if (strcasecmp($_SERVER['REQUEST_METHOD'], 'POST') != 0) {
-            echo json_encode(array('result' => 'false', 'error' => 'Request method must be POST!'));
+            echo json_encode(array('status' => 'false', 'message' => 'Request method must be POST!'));
             exit;
         }
         $content = json_decode(file_get_contents("php://input"));
-        if (isset($_SERVER['HTTP_TOKEN'])) {
-            if (process_token($_SERVER['HTTP_TOKEN'])) {
-                $this->process_ws_api();
-            } else {
-                echo json_encode(array('result' => 'false', 'error' => 'Invalid Request Token'));
-                exit;
-            }
-        } else {
-            echo json_encode(array('result' => 'false', 'error' => 'Unauthorized Request'));
-            exit;
-        }
+        $this->process_ws_api();
+//        if (isset($_SERVER['HTTP_TOKEN'])) {
+//            if (process_token($_SERVER['HTTP_TOKEN'])) {
+//                $this->process_ws_api();
+//            } else {
+//                echo json_encode(array('status' => 'false', 'message' => 'Invalid Request Token'));
+//                exit;
+//            }
+//        } else {
+//            echo json_encode(array('status' => 'false', 'message' => 'Unauthorized Request'));
+//            exit;
+//        }
     }
 
     /**
@@ -58,10 +59,10 @@ class Order extends CI_Controller {
             switch ($this->input->get('mod')) {
                 case 'order_medicine' : $this->ws_oderMedicine();
                     break;
-                default: echo json_encode(array('result' => 'false', 'error' => 'Request syntax error'));
+                default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
         } else {
-            echo json_encode(array('result' => 'false', 'error' => 'Invalid call'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid call'));
         }
         exit;
     }
@@ -97,14 +98,16 @@ class Order extends CI_Controller {
         );
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {
-            echo json_encode(array('result' => 'false', 'error' => preg_replace("/\r|\n/", "", validation_errors("'", "',"))));
+            $errors = preg_replace("/\r|\n/", "", validation_errors(" ", " "));
+            $errors = ltrim(explode('.',$errors)[0]);
+            echo json_encode(array('status' => 'false', 'message' => $errors));
         } else {
             $error = '';
             if(isset($_POST['attachment'])) {
                 foreach($_POST['attachment'] as $attach){
                     $error = $this->verify_attachment($attach);
                     if(!empty($error)){
-                        echo json_encode(array('result' => 'false', 'error' => $error ));
+                        echo json_encode(array('status' => 'false', 'message' => $error ));
                         break;
                     }
                 }
@@ -146,7 +149,7 @@ class Order extends CI_Controller {
                         }
                     }
                 }
-                echo json_encode(array('result' => 'true', 'orderId' => $order_id));
+                echo json_encode(array('status' => 'true', 'orderId' => $order_id));
             }
         }
         exit;
