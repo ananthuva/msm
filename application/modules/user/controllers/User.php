@@ -19,46 +19,51 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/profile', 'refresh');
         }
     }
- 
+
     /**
      * This function is used to process api
      * @return String
      */
     public function ws_api() {
-        if($this->input->get('mod') && !empty($this->input->get('mod'))){
-            switch($this->input->get('mod')) {
-                case 'login' : $this->ws_login(); break;
-                case 'register' : $this->ws_register(); break;
-                case 'generate_otp' : $this->ws_sendOTPtoMobile(); break;
-                case 'verify_otp' : $this->ws_verifyMobileNumber(); break;
-                default: echo json_encode(array('status' => 'false','message' => 'Request syntax error'));
+        if ($this->input->get('mod') && !empty($this->input->get('mod'))) {
+            switch ($this->input->get('mod')) {
+                case 'login' : $this->ws_login();
+                    break;
+                case 'register' : $this->ws_register();
+                    break;
+                case 'generate_otp' : $this->ws_sendOTPtoMobile();
+                    break;
+                case 'verify_otp' : $this->ws_verifyMobileNumber();
+                    break;
+                default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
         } else {
-            echo json_encode(array('status' => 'false','message' => 'Invalid call'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid call'));
         }
         exit;
     }
+
     /**
      * This function is used for api login
      * @return String
      */
     public function ws_login() {
         $content = json_decode(file_get_contents("php://input"));
-        if(!empty($content->email) && !empty($content->password)) {
+        if (!empty($content->email) && !empty($content->password)) {
             $_POST['email'] = $content->email;
             $_POST['password'] = $content->password;
             $return = $this->User_model->auth_user();
             if (empty($return)) {
-                echo json_encode(array('status' => 'false','message' => 'Invalid username or password'));
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid username or password'));
             } else {
                 if ($return == 'not_verified') {
-                    echo json_encode(array('status' => 'false','message' => 'Accout not verified.'));
-                } else if(isset($return['number_not_verified']) && !empty($return['number_not_verified'])){ 
-                    echo json_encode(array('status' => 'false','message' => 'User mobile not verified'));
+                    echo json_encode(array('status' => 'false', 'message' => 'Accout not verified.'));
+                } else if (isset($return['number_not_verified']) && !empty($return['number_not_verified'])) {
+                    echo json_encode(array('status' => 'false', 'message' => 'User mobile not verified'));
                 } else {
-                    $UserData = (array)$return[0];
+                    $UserData = (array) $return[0];
                     $key = $this->randomString();
-                    $token = simple_crypt($UserData['email'],$key); 
+                    $token = simple_crypt($UserData['email'], $key);
                     $hash = password_hash($UserData['email'], PASSWORD_DEFAULT);
                     $this->User_model->updateRow('users', 'user_id', $UserData['user_id'], array('hash' => $hash));
                     unset($UserData['password']);
@@ -67,54 +72,55 @@ class User extends CI_Controller {
                     unset($UserData['var_otp']);
                     unset($UserData['created_by']);
                     unset($UserData['hash']);
-                    echo str_replace(':null',':""',json_encode(array('status' => 'true','message' => 'Login successful', 'token' => $token.':'.$key,'Data' => $UserData)));
+                    echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Login successful', 'token' => $token . ':' . $key, 'Data' => $UserData)));
                 }
             }
         } else {
-            echo json_encode(array('status' => 'false','message' => 'Invalid username or password'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid username or password'));
         }
         exit;
     }
+
     /**
      * This function is used for api registration
      * @return String
      */
     public function ws_register() {
         $content = json_decode(file_get_contents("php://input"));
-        if(empty($content->first_name)) {
-            echo json_encode(array('status' => 'false','message' => 'Invalid first name'));
-        } else if(empty($content->email)){
-            echo json_encode(array('status' => 'false','message' => 'Invalid email'));
-        } else if(empty($content->dob)){
-            echo json_encode(array('status' => 'false','message' => 'Invalid dob'));
-        } else if(empty($content->mobile_no)){
-            echo json_encode(array('status' => 'false','message' => 'Invalid mobile number'));
-        } else if(empty($content->password)){
-            echo json_encode(array('status' => 'false','message' => 'Invalid password'));
+        if (empty($content->first_name)) {
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid first name'));
+        } else if (empty($content->email)) {
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid email'));
+        } else if (empty($content->dob)) {
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid dob'));
+        } else if (empty($content->mobile_no)) {
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid mobile number'));
+        } else if (empty($content->password)) {
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid password'));
         } else {
             if (!(filter_var($content->email, FILTER_VALIDATE_EMAIL))) {
-                echo json_encode(array('status' => 'false','message' => 'Invalid Email'));
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid Email'));
                 exit;
             }
             if (preg_match('/^[0-9]{10}+$/', $content->mobile_no) == 0) {
-                echo json_encode(array('status' => 'false','message' => 'Invalid Mobile Number'));
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid Mobile Number'));
                 exit;
             }
             $checkValue = $this->User_model->check_exists('users', 'email', $content->email);
             if ($checkValue == false) {
-                echo json_encode(array('status' => 'false','message' => 'Email Already Registered'));
+                echo json_encode(array('status' => 'false', 'message' => 'Email Already Registered'));
                 exit;
             }
-            $checkValue1 = $this->User_model->check_exists('users', 'mobile_no', '+91'.$content->mobile_no);
+            $checkValue1 = $this->User_model->check_exists('users', 'mobile_no', '+91' . $content->mobile_no);
             if ($checkValue1 == false) {
-                echo json_encode(array('status' => 'false','message' => 'Mobile Already Registered'));
+                echo json_encode(array('status' => 'false', 'message' => 'Mobile Already Registered'));
                 exit;
             }
             $password = password_hash($content->password, PASSWORD_DEFAULT);
             $data['status'] = 'active';
             $data['name'] = $content->first_name;
             $data['lname'] = $content->last_name;
-            $data['mobile_no'] = '+91'.$content->mobile_no;
+            $data['mobile_no'] = '+91' . $content->mobile_no;
             $data['email'] = $content->email;
             $data['dob'] = date("Y-m-d", strtotime($content->dob));
             $data['user_type'] = 'Member';
@@ -124,60 +130,61 @@ class User extends CI_Controller {
             $user_id = $this->User_model->create('users', $data);
             $data['user_id'] = $user_id;
             $key = $this->randomString();
-            $token = simple_crypt($data['email'],$key); 
+            $token = simple_crypt($data['email'], $key);
             $hash = password_hash($data['email'], PASSWORD_DEFAULT);
             $this->User_model->updateRow('users', 'user_id', $user_id, array('hash' => $hash));
             unset($data['password']);
             unset($data['profile_pic']);
             unset($data['is_deleted']);
             unset($data['hash']);
-            echo str_replace(':null',':""',json_encode(array('status' => 'true','message' => 'Registration successful','token' => $token.':'.$key,'Data' => $data)));
+            echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Registration successful', 'token' => $token . ':' . $key, 'Data' => $data)));
         }
         exit;
     }
+
     /**
      * This function is used for opt request using api
      * @return String
      */
     public function ws_sendOTPtoMobile() {
         $content = json_decode(file_get_contents("php://input"));
-        if(!empty($content->user_id) && !empty($content->mobile_number)) {
+        if (!empty($content->user_id) && !empty($content->mobile_number)) {
             $_POST['user_id'] = $content->user_id;
             $_POST['mobile_number'] = $content->mobile_number;
             $return = $this->sendOTPtoMobile('ws');
             if (empty($return)) {
-                echo json_encode(array('status' => 'false','message' => 'Invalid userid'));
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid userid'));
             } else {
                 echo json_encode($return);
             }
         } else {
-            echo json_encode(array('status' => 'false','message' => 'Invalid user_id or mobile number'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid user_id or mobile number'));
         }
         exit;
     }
+
     /**
      * This function is used for otp verification using api
      * @return String
      */
     public function ws_verifyMobileNumber() {
         $content = json_decode(file_get_contents("php://input"));
-        if(!empty($content->user_id) && !empty($content->otp)) {
+        if (!empty($content->user_id) && !empty($content->otp)) {
             $user_id = $content->user_id;
             $otp = $content->otp;
             $res = $this->User_model->verifyMobileNumber($otp, $user_id);
             if (!empty($res)) {
                 $this->User_model->updateRow('users', 'user_id', $user_id, array('is_verified' => 1));
-                
+
                 if (isset($content->mobile_number) && !empty($content->mobile_number))
                     $this->User_model->updateRow('users', 'user_id', $user_id, array('mobile_no' => $content->mobile_number));
-                
-                echo json_encode(array('status' => 'true','message' => 'Valid OTP'));
+
+                echo json_encode(array('status' => 'true', 'message' => 'Valid OTP'));
             } else {
-                echo json_encode(array('status' => 'false','message' => 'Invalid OTP'));
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid OTP'));
             }
-            
         } else {
-            echo json_encode(array('status' => 'false','message' => 'Invalid user_id or otp'));
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid user_id or otp'));
         }
         exit;
     }
@@ -228,13 +235,13 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/login', 'refresh');
         }
     }
-    
+
     /**
      * This function is used to authentify user
      * @return Void
      */
     public function authentify($user_id = '') {
-        if(empty($user_id)){
+        if (empty($user_id)) {
             redirect(base_url() . 'user/login', 'refresh');
         }
         if (isset($_SESSION['user_details'])) {
@@ -246,7 +253,7 @@ class User extends CI_Controller {
             $mobile_number = $this->User_model->get_mobile_number($user_id);
             $mobile_number['user_id'] = $user_id;
             $this->load->view('include/script', $data);
-            $this->load->view('authentify',$mobile_number);
+            $this->load->view('authentify', $mobile_number);
         } else {
             $this->session->set_flashdata('messagePr', 'Registration Not allowed..');
             redirect(base_url() . 'user/login', 'refresh');
@@ -266,8 +273,8 @@ class User extends CI_Controller {
             if ($return == 'not_verified') {
                 $this->session->set_flashdata('messagePr', 'This accout is not verified. Please contact to your admin..');
                 redirect(base_url() . 'user/login', 'refresh');
-            } else if(isset($return['number_not_verified']) && !empty($return['number_not_verified'])){ 
-                redirect(base_url() . 'user/authentify/'.$return['number_not_verified'], 'refresh');
+            } else if (isset($return['number_not_verified']) && !empty($return['number_not_verified'])) {
+                redirect(base_url() . 'user/authentify/' . $return['number_not_verified'], 'refresh');
             } else {
                 $this->session->set_userdata('user_details', $return);
             }
@@ -358,7 +365,7 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/login', 'refresh');
         }
     }
-    
+
     /**
      * This function is used to verify user mobile number
      * @return : void
@@ -375,10 +382,10 @@ class User extends CI_Controller {
             redirect(base_url() . 'user/login', 'refresh');
         } else {
             $this->session->set_flashdata('messagePr', 'Invalid OTP. Please try again');
-            redirect(base_url() . 'user/authentify/'.$user_id, 'refresh');
+            redirect(base_url() . 'user/authentify/' . $user_id, 'refresh');
         }
     }
-    
+
     /**
      * This function is used to send OTP to registered mobiles
      * @return : void
@@ -387,10 +394,10 @@ class User extends CI_Controller {
         $mobileNumber = $this->input->post('mobile_number');
         $user_id = $this->input->post('user_id');
         $otp = $this->getOTP();
-        $mobileNumber = '+91'.substr($mobileNumber, -10);
-        $result = $this->User_model->updateRow('users', 'user_id', $user_id, array('var_otp' => $otp),'mobile_no',$mobileNumber);
-        if($result){
-            $message = urlencode($otp. " is your verification code");
+        $mobileNumber = '+91' . substr($mobileNumber, -10);
+        $result = $this->User_model->updateRow('users', 'user_id', $user_id, array('var_otp' => $otp), 'mobile_no', $mobileNumber);
+        if ($result) {
+            $message = urlencode($otp . " is your verification code");
 
             //Prepare you post parameters
             $postData = array(
@@ -416,20 +423,20 @@ class User extends CI_Controller {
             curl_close($curl);
             $result = array();
             if ($err) {
-               $result['result'] = 'false';
-               $result['error'] = "cURL Error #:" . $err;
+                $result['result'] = 'false';
+                $result['error'] = "cURL Error #:" . $err;
             } else {
-               $result['result'] = 'true';
-               $result['otp'] = $otp;
+                $result['result'] = 'true';
+                $result['otp'] = $otp;
             }
-            if(!empty($ws)){
+            if (!empty($ws)) {
                 return $result;
             }
             echo json_encode($result);
-        } else if(!empty($ws)) {
-            return array('status' => 'false','message' => 'Invalid Mobile or UserId');
+        } else if (!empty($ws)) {
+            return array('status' => 'false', 'message' => 'Invalid Mobile or UserId');
         } else {
-            echo json_encode(array('result' => 'false','error' => 'Invalid Mobile or UserId'));
+            echo json_encode(array('result' => 'false', 'error' => 'Invalid Mobile or UserId'));
         }
     }
 
@@ -441,7 +448,7 @@ class User extends CI_Controller {
         $pw = $this->randomString();
         return $verificat_key = password_hash($pw, PASSWORD_DEFAULT);
     }
-    
+
     /**
      * This function is generate 4 digit random number
      * @return string
@@ -610,17 +617,17 @@ class User extends CI_Controller {
                 }
             }
         }
-        $this->form_validation->set_rules('address', 'Address', 'trim');    
-        $this->form_validation->set_rules('email', 'Email', 'trim|valid_email');   
-        $this->form_validation->set_rules('mobile_no', 'Mobile Number', 'trim|numeric|exact_length[10]');    
+        $this->form_validation->set_rules('address', 'Address', 'trim');
+        $this->form_validation->set_rules('email', 'Email', 'trim|valid_email');
+        $this->form_validation->set_rules('mobile_no', 'Mobile Number', 'trim|numeric|exact_length[10]');
         $this->form_validation->set_rules('name', 'First Name', 'trim|required');
         $this->form_validation->set_rules('dob', 'Date of Birth', 'trim|required');
         if ($id != '') {
             $this->form_validation->set_rules('password', 'Password', 'trim|required');
         }
         if ($this->form_validation->run() === TRUE) {
-            $_POST['mobile_no'] = '+91'.$_POST['mobile_no'];
-            if(isset($_POST['dob'])) {
+            $_POST['mobile_no'] = '+91' . $_POST['mobile_no'];
+            if (isset($_POST['dob'])) {
                 $_POST['dob'] = date("Y-m-d", strtotime($_POST['dob']));
             }
             if ($id != '') {
@@ -666,7 +673,7 @@ class User extends CI_Controller {
                 $data['profile_pic'] = $profile_pic;
                 $this->User_model->updateRow('users', 'user_id', $id, $data);
                 $this->session->set_flashdata('messagePr', 'Your data updated Successfully..');
-                redirect( base_url().'user/'.$redirect, 'refresh');
+                redirect(base_url() . 'user/' . $redirect, 'refresh');
             } else {
                 if ($this->input->post('user_type') != 'admin') {
                     $data = $this->input->post();
@@ -702,20 +709,20 @@ class User extends CI_Controller {
                     unset($data['submit']);
                     $user_id = $this->User_model->create('users', $data);
                     $success = 'Successfully Registered..';
-                    if($redirect == 'registration'){
-                        redirect( base_url().'user/authentify/'.$user_id, 'refresh');
-                    }else {
+                    if ($redirect == 'registration') {
+                        redirect(base_url() . 'user/authentify/' . $user_id, 'refresh');
+                    } else {
                         $this->session->set_flashdata('messagePr', $success);
-                        redirect( base_url().'user/'.$redirect, 'refresh');
+                        redirect(base_url() . 'user/' . $redirect, 'refresh');
                     }
                 } else {
                     $this->session->set_flashdata('messagePr', 'You Don\'t have this autherity ');
-                    redirect(base_url() . 'user/'.$redirect, 'refresh');
+                    redirect(base_url() . 'user/' . $redirect, 'refresh');
                 }
             }
         }
         $this->session->set_flashdata('messagePr', validation_errors());
-        redirect( base_url().'user/'.$redirect, 'refresh');
+        redirect(base_url() . 'user/' . $redirect, 'refresh');
     }
 
     /**
