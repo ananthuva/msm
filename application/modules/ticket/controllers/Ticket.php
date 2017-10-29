@@ -12,7 +12,8 @@ class Ticket extends CI_Controller {
      * This function is used to load page view
      * @return Void
      */
-  public function index(){   
+  public function index(){
+    is_login();
     $this->load->view("include/header");
     $this->load->view("index");
     $this->load->view("include/footer");

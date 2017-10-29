@@ -76,7 +76,6 @@ class Order extends CI_Controller {
         $content = json_decode(file_get_contents("php://input"));
         $_POST = (array) $content;
         $rules = array(
-            [ 'field' => 'store_id', 'label' => 'store id', 'rules' => 'required'],
             [ 'field' => 'user_id', 'label' => 'user id', 'rules' => 'required',],
             [ 'field' => 'delivery_full_name', 'label' => 'Name in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_mobile', 'label' => 'mobile in Delivery Address', 'rules' => 'required',],
@@ -114,7 +113,7 @@ class Order extends CI_Controller {
             }
             if(empty($error)) {
                 $order['order_bill_id'] = 'Ord-' . date('YmdHis');
-                $order['store_id'] = $content->store_id;
+                $order['store_id'] = (isset($content->store_id)) ? $content->store_id : '';
                 $order['note'] = $content->note;
                 $order['user_id'] = $content->user_id;
                 $order['order_date'] = date('Y-m-d');
@@ -239,13 +238,14 @@ class Order extends CI_Controller {
         $primaryKey = 'id';
 
         $joinQuery = "FROM `order` AS `o` LEFT JOIN `users` AS `u` ON (`u`.`user_id`=`o`.`user_id`)"
-                . " LEFT JOIN `stores` AS `s` ON (`s`.`id`=`o`.`store_id`)";
+                . " LEFT JOIN `stores` AS `s` ON (`s`.`id`=`o`.`store_id`)"
+                . " LEFT JOIN `table_order_status` AS `os` ON (`os`.`order_status_id`=`o`.`status`)";
         $columns = array(
             array('db' => '`o`.`id`', 'dt' => 0, 'field' => 'id'),
             array('db' => '`u`.`name`', 'dt' => 1, 'field' => 'name'),
             array('db' => '`s`.`name`', 'dt' => 2, 'field' => 'store_name', 'as' => 'store_name'),
             array('db' => '`o`.`order_date`', 'dt' => 3, 'field' => 'order_date'),
-            array('db' => '`o`.`status`', 'dt' => 4, 'field' => 'status')
+            array('db' => '`os`.`order_status_name`', 'dt' => 4, 'field' => 'order_status', 'as' => 'order_status')
         );
 
         $sql_details = array(
