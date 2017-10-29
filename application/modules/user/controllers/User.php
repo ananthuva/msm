@@ -67,7 +67,7 @@ class User extends CI_Controller {
                     unset($UserData['var_otp']);
                     unset($UserData['created_by']);
                     unset($UserData['hash']);
-                    echo str_replace(':null',':""',json_encode(array('status' => 'true','token' => $token.':'.$key,'Data' => $UserData)));
+                    echo str_replace(':null',':""',json_encode(array('status' => 'true','message' => 'Login successful', 'token' => $token.':'.$key,'Data' => $UserData)));
                 }
             }
         } else {
@@ -131,7 +131,7 @@ class User extends CI_Controller {
             unset($data['profile_pic']);
             unset($data['is_deleted']);
             unset($data['hash']);
-            echo str_replace(':null',':""',json_encode(array('status' => 'true','token' => $token.':'.$key,'Data' => $data)));
+            echo str_replace(':null',':""',json_encode(array('status' => 'true','message' => 'Registration successful','token' => $token.':'.$key,'Data' => $data)));
         }
         exit;
     }

@@ -37,17 +37,17 @@ class Order extends CI_Controller {
         }
         $content = json_decode(file_get_contents("php://input"));
         $this->process_ws_api();
-//        if (isset($_SERVER['HTTP_TOKEN'])) {
-//            if (process_token($_SERVER['HTTP_TOKEN'])) {
-//                $this->process_ws_api();
-//            } else {
-//                echo json_encode(array('status' => 'false', 'message' => 'Invalid Request Token'));
-//                exit;
-//            }
-//        } else {
-//            echo json_encode(array('status' => 'false', 'message' => 'Unauthorized Request'));
-//            exit;
-//        }
+        if (isset($_SERVER['HTTP_TOKEN'])) {
+            if (process_token($_SERVER['HTTP_TOKEN'])) {
+                $this->process_ws_api();
+            } else {
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid Request Token'));
+                exit;
+            }
+        } else {
+            echo json_encode(array('status' => 'false', 'message' => 'Unauthorized Request'));
+            exit;
+        }
     }
 
     /**
@@ -149,7 +149,7 @@ class Order extends CI_Controller {
                         }
                     }
                 }
-                echo json_encode(array('status' => 'true', 'orderId' => $order_id));
+                echo json_encode(array('status' => 'true','message' => 'Order successful', 'orderId' => $order_id));
             }
         }
         exit;

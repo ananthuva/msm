@@ -81,7 +81,7 @@ class Store extends CI_Controller {
             if (empty($return)) {
                 echo json_encode(array('status' => 'false', 'message' => 'No stores found'));
             } else {
-                echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'Data' => $return)));
+                echo str_replace(':null', ':""', json_encode(array('status' => 'true','message' => 'Request successful', 'Data' => $return)));
             }
         } else {
             echo json_encode(array('status' => 'false', 'message' => 'Invalid latitude or longitude'));
@@ -133,7 +133,7 @@ class Store extends CI_Controller {
             unset($data['last_modified_by']);
             unset($data['created_on']);
             unset($data['last_modified_on']);
-            echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'Data' => $data)));
+            echo str_replace(':null', ':""', json_encode(array('status' => 'true','message' => 'Store creation successful', 'Data' => $data)));
         }
         exit;
     }
