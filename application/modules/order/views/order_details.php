@@ -256,7 +256,7 @@
                                     </div>
                                 <?php }
                             } ?>
-                        <?php if(!$delivered) {?>
+                        <?php if(isset($delivered) && !$delivered) {?>
                             <div class="col-xs-3 bs-wizard-step disabled">
                                 <div class="text-center bs-wizard-stepnum">Not yet Delivered</div>
                                 <div class="progress"><div class="progress-bar"></div></div>
