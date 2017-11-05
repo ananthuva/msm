@@ -257,11 +257,71 @@ class Order extends CI_Controller {
 
         $output_arr = SSP::simple($_GET, $sql_details, $table, $primaryKey, $columns, $joinQuery);
         foreach ($output_arr['data'] as $key => $value) {
+            $id = $output_arr['data'][$key][0];
             $output_arr['data'][$key][0] = '<input type="checkbox" name="selData" value="' . $output_arr['data'][$key][0] . '">';
             $output_arr['data'][$key][3] = date("d-m-Y", strtotime($output_arr['data'][$key][3]) );
+            $output_arr['data'][$key][5] = '<a id="btnEditRow" class="mClass"  href="' . base_url() . 'order/viewOrder/' . $id . '" type="button" title="View Order"><i class="fa fa-eye"></i></a>';
         }
 
         echo json_encode($output_arr);
+    }
+    
+    /**
+     * This function is used for view an order
+     * @return Void
+     */
+    public function viewOrder($id = '') {
+        is_login();
+        if (CheckPermission("order", "own_read") && !empty($id)) {
+            $this->load->view('include/header');
+            $data['order'] = $this->Order_model->getOrderdetails($id);
+            $data['order_status'] = isset($data['order']['order_status_name']) ? $this->getStatusName($data['order']['order_status_name']) : '';
+            $data['billing'] = $this->Order_model->getOrderBillingAddress($id);
+            $data['delivery'] = $this->Order_model->getOrderDeliveryAddress($id);
+            $data['attachments'] = $this->Order_model->getOrderAttachment($id);
+            $data['history'] = $this->Order_model->getOrderHistory($id);
+            if (!empty($data['history'])) {
+                foreach ($data['history'] as &$history) {
+                    $history['status'] = isset($history['order_status_name']) ? $this->getStatusName($history['order_status_name']) : '';
+                }
+            }
+            $this->load->view('order_details', $data);
+            $this->load->view('include/footer');
+        } else {
+            $this->session->set_flashdata('messagePr', 'You don\'t have permission to access.');
+            redirect(base_url() . 'user/profile', 'refresh');
+        }
+    }
+
+    public function getStatusName($status = "") {
+        $statusName = '';
+        if (!empty($status)) {
+            switch ($status) {
+                case 'Send Prescription' :
+                    $statusName = 'Placed by User';
+                    break;
+                case 'Get Quote' :
+                    $statusName = 'Got Quote';
+                    break;
+                case 'Confirmed Order' :
+                    $statusName = 'Confirmed';
+                    break;
+                case 'Rejected Order' :
+                    $statusName = 'Rejected';
+                    break;
+                case 'Done Payment' :
+                    $statusName = 'Payment Completed';
+                    break;
+                case 'Out For Delivery' :
+                    $statusName = 'is Out For Delivery';
+                    break;
+                case 'Delivered' :
+                    $statusName = 'Delivered';
+                    break;
+                default : break;
+            }
+        }
+        return $statusName;
     }
 
 }

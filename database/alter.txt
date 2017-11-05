@@ -64,21 +64,7 @@ INSERT INTO `table_order_status`(`order_status_id`,`order_status_name`) VALUES (
 INSERT INTO `table_order_status`(`order_status_id`,`order_status_name`) VALUES ( NULL,'Done Payment');
 INSERT INTO `table_order_status`(`order_status_id`,`order_status_name`) VALUES ( NULL,'Delivered');
 
-CREATE TABLE `table_get_quote_status` (
-  `status_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `status_name` char(100) DEFAULT NULL,
-  PRIMARY KEY (`status_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
-INSERT INTO `table_get_quote_status`(`status_id`,`status_name`) VALUES ( NULL,'Pending');
-INSERT INTO `table_get_quote_status`(`status_id`,`status_name`) VALUES ( NULL,'Accepted');
-INSERT INTO `table_get_quote_status`(`status_id`,`status_name`) VALUES ( NULL,'Rejected');
-
-ALTER TABLE `order`     ADD COLUMN `get_quote_status` INT(10) NULL AFTER `status`;
-ALTER TABLE `order_history`     ADD COLUMN `get_quote_status` INT(10) NULL AFTER `order_status`,
-    CHANGE `order_status` `order_status` INT(10) NULL ;
-
 UPDATE `table_order_status` SET `order_status_name`='Processed' WHERE `order_status_id`='5';
 INSERT INTO `table_order_status`(`order_status_id`,`order_status_name`) VALUES ( NULL,'Out For Delivery');
 INSERT INTO `table_order_status`(`order_status_id`,`order_status_name`) VALUES ( NULL,'Delivered');
+/******************************************************/

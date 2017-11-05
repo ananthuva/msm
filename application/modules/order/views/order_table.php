@@ -18,7 +18,7 @@
                     <div style="padding: 5px 0px 0px 10px;" class="row">
                         <div class="col-sm-3" style="width: 21% !important; padding-right: 0px;">
                             <label> Filter:
-                                <select name="order_type" id="user_type" class="form-control inline-77 input-sm" onchange="filterByOption()" style="padding-right: 16px;">
+                                <select name="order_type" id="order_type" class="form-control inline-77 input-sm" onchange="filterByOption()" style="padding-right: 16px;">
                                     <option  value=""> No Filter </option>
                                     <option  value="new_order"> New Orders </option>
                                     <option  value="assigned_order"> Assigned Orders </option>
@@ -56,7 +56,8 @@
                                     <th>Ordered by</th>
                                     <th>Store Name</th>
                                     <th>Date of Order</th>
-                                    <th>Status</th>
+                                    <th>Order Status</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -73,25 +74,16 @@
     </section>
     <!-- /.content -->
 </div>  
-<!-- Modal Crud Start-->
-<div class="modal fade" id="nameModal_order" role="dialog">
-    <div class="modal-dialog">
-        <div class="box box-primary popup" >
-            <div class="box-header with-border formsize">
-                <h3 class="box-title">Order Form</h3>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
-            </div>
-            <!-- /.box-header -->
-            <div class="modal-body" style="padding: 0px 0px 0px 0px;"></div>
-        </div>
-    </div>
-</div><!--End Modal Crud --> 
 <script type="text/javascript">
     $(document).ready(function () {
         loadTable();
         $("button.closeTest, button.close").on("click", function () {});     
         
     });
+    
+    function filterByOption() {
+        $('#example1').DataTable().ajax.reload();
+    }
 
     function loadTable() {
         var url = '<?php echo base_url(); ?>';
@@ -107,7 +99,10 @@
             "serverSide": true,
             "destroy": true,
             "ajax": {
-                "url": url + "order/dataTable"
+                "url": url + "order/dataTable",
+                "data": function (d) {
+                    d.filter_option = $('#order_type').val();
+                }
             },
             "sPaginationType": "full_numbers",
             "language": {

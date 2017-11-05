@@ -211,11 +211,111 @@ class SSP {
         $where = SSP::filter( $request, $columns, $bindings, $joinQuery );
         
         
-		// IF Extra where set then set and prepare query
+	// IF Extra where set then set and prepare query
         if($extraWhere)
             $extraWhere = ($where) ? ' AND '.$extraWhere : ' WHERE '.$extraWhere;
         $groupBy = ($groupBy) ? ' GROUP BY '.$groupBy .' ' : '';
         $having = ($having) ? ' HAVING '.$having .' ' : '';
+        
+        if(isset($request['filter_option']) && !empty($request['filter_option'])) {
+            switch($request['filter_option']){
+                case 'new_order' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `os`.`order_status_name` = 'Send Prescription'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'assigned_order' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `os`.`order_status_name` = 'Get Quote'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'acc_order' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `os`.`order_status_name` = 'Confirmed Order'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'rej_order' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `os`.`order_status_name` = 'Rejected Order'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'proc_order' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `os`.`order_status_name` = 'Done Payment'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'cod' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `o`.`payment_type` = 'COD'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'online_pay' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `o`.`payment_type` = 'ONLINE'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'out_delivery' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `os`.`order_status_name` = 'Out For Delivery'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                case 'delivered' :
+                    if(!empty($where)) {
+                        $where = ltrim($where,"WHERE ");
+                        $where = " AND ".$where;
+                    }
+                    $where = "WHERE `os`.`order_status_name` = 'Delivered'".$where;
+                    if(empty($order)) {
+                        $order = "ORDER BY `o`.`created_on` DESC";
+                    }
+                    break;
+                default: 
+                    break;
+            }
+        }
+        
+        
+        
         // Main query to actually get the data
         if($joinQuery){
             $col = SSP::pluck($columns, 'db', $joinQuery);
