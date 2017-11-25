@@ -59,6 +59,10 @@ class Order extends CI_Controller {
             switch ($this->input->get('mod')) {
                 case 'order_medicine' : $this->ws_oderMedicine();
                     break;
+                case 'order_list' : $this->ws_oderList();
+                    break;
+                case 'order_details' : $this->ws_oderDetails();
+                    break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
         } else {
@@ -68,11 +72,11 @@ class Order extends CI_Controller {
     }
 
     /**
-     * This function is used for getting nearest stores
+     * This function is used for ordering Medicine
      * @return String
      */
     public function ws_oderMedicine() {
-        //{"a":"1","attachment":["s","t"]}
+
         $content = json_decode(file_get_contents("php://input"));
         $_POST = (array) $content;
         $rules = array(
@@ -98,20 +102,20 @@ class Order extends CI_Controller {
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {
             $errors = preg_replace("/\r|\n/", "", validation_errors(" ", " "));
-            $errors = ltrim(explode('.',$errors)[0]);
+            $errors = ltrim(explode('.', $errors)[0]);
             echo json_encode(array('status' => 'false', 'message' => $errors));
         } else {
             $error = '';
-            if(isset($_POST['attachment'])) {
-                foreach($_POST['attachment'] as $attach){
+            if (isset($_POST['attachment'])) {
+                foreach ($_POST['attachment'] as $attach) {
                     $error = $this->verify_attachment($attach);
-                    if(!empty($error)){
-                        echo json_encode(array('status' => 'false', 'message' => $error ));
+                    if (!empty($error)) {
+                        echo json_encode(array('status' => 'false', 'message' => $error));
                         break;
                     }
                 }
             }
-            if(empty($error)) {
+            if (empty($error)) {
                 $order['order_bill_id'] = 'Ord-' . date('YmdHis');
                 $order['store_id'] = (isset($content->store_id)) ? $content->store_id : '';
                 $order['note'] = $content->note;
@@ -138,17 +142,56 @@ class Order extends CI_Controller {
                 $billing['pin'] = $content->billing_pin;
                 $billing['state_id'] = $content->billing_state_id;
                 $this->Order_model->insertRow('billing_address', $billing);
-                if(isset($_POST['attachment'])) {
-                    foreach($_POST['attachment'] as $attach){
+                if (isset($_POST['attachment'])) {
+                    foreach ($_POST['attachment'] as $attach) {
                         $file = $this->upload_attachment($attach);
-                        if(!empty($file)) {
+                        if (!empty($file)) {
                             $attachment['order_id'] = $order_id;
                             $attachment['attachment'] = $file;
                             $this->Order_model->insertRow('attachment', $attachment);
                         }
                     }
                 }
-                echo json_encode(array('status' => 'true','message' => 'Order successful', 'orderId' => $order_id));
+                echo json_encode(array('status' => 'true', 'message' => 'Order successful', 'orderId' => $order_id));
+            }
+        }
+        exit;
+    }
+
+    /**
+     * This function is used for getting list of orders
+     * @return String
+     */
+    public function ws_oderList() {
+        $content = json_decode(file_get_contents("php://input"));
+        $limit = property_exists($content, 'limit') ? $content->limit : '';
+        $offset = property_exists($content, 'offset') ? $content->offset : '';
+        $orders = $this->Order_model->getOrderList($limit, $offset);
+        $result = str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $orders)));
+        echo str_replace('}]', '}}', str_replace('[{', '{{', $result));
+        exit;
+    }
+
+    /**
+     * This function is used for getting an order details
+     * @return String
+     */
+    public function ws_oderDetails() {
+        $content = json_decode(file_get_contents("php://input"));
+        $id = property_exists($content, 'order_id') ? $content->order_id : '';
+        if (empty($id)) {
+            echo json_encode(array('status' => 'false', 'message' => 'order_id is required'));
+        } else {
+            $data['order'] = $this->Order_model->getOrderdetails($id);
+            if (empty($data['order'])) {
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid order_id'));
+            } else {
+                $data['billing_details'] = $this->Order_model->getOrderBillingAddress($id);
+                $data['delivery_details'] = $this->Order_model->getOrderDeliveryAddress($id);
+                $data['attachments'] = $this->Order_model->getOrderAttachment($id);
+                $data['history'] = $this->Order_model->getOrderHistory($id);
+                $result = str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $data)));
+                echo str_replace('}]', '}}', str_replace('[{', '{{', $result));
             }
         }
         exit;
@@ -211,17 +254,17 @@ class Order extends CI_Controller {
         }
     }
 
-    function verify_attachment($file){
+    function verify_attachment($file) {
         $data = base64_decode($file);
         $file_byte_size = strlen($data);
         $f = finfo_open();
         $mime_type = finfo_buffer($f, $data, FILEINFO_MIME_TYPE);
         $error_upload = "";
-        if($file_byte_size > 10485760){
+        if ($file_byte_size > 10485760) {
             $error_upload = "Attachment exceeds allowed file size";
-        }else{
-            $allowed_type = array("image/png","image/jpeg","image/gif","application/pdf","application/zip","application/xls","text/plain","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/msword","application/octet-stream","application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-            if(!in_array($mime_type,$allowed_type)){
+        } else {
+            $allowed_type = array("image/png", "image/jpeg", "image/gif", "application/pdf", "application/zip", "application/xls", "text/plain", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/msword", "application/octet-stream", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            if (!in_array($mime_type, $allowed_type)) {
                 $error_upload = "Attachment has an invalid extension";
             }
         }
@@ -259,13 +302,13 @@ class Order extends CI_Controller {
         foreach ($output_arr['data'] as $key => $value) {
             $id = $output_arr['data'][$key][0];
             $output_arr['data'][$key][0] = '<input type="checkbox" name="selData" value="' . $output_arr['data'][$key][0] . '">';
-            $output_arr['data'][$key][3] = date("d-m-Y", strtotime($output_arr['data'][$key][3]) );
+            $output_arr['data'][$key][3] = date("d-m-Y", strtotime($output_arr['data'][$key][3]));
             $output_arr['data'][$key][5] = '<a id="btnEditRow" class="mClass"  href="' . base_url() . 'order/viewOrder/' . $id . '" type="button" title="View Order"><i class="fa fa-eye"></i></a>';
         }
 
         echo json_encode($output_arr);
     }
-    
+
     /**
      * This function is used for view an order
      * @return Void

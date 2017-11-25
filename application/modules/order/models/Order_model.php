@@ -73,6 +73,25 @@ class Order_model extends SYS_Model {
         $this->db->update($table, $data);
         return $this->db->affected_rows();
     }
+    
+      /**
+     * This function is used to get order list 
+     */
+    public function getOrderList($limit = '', $offset = '') {
+        $limit = empty($limit) ? 100 : $limit;
+        $offset = empty($limit) ? 0 : $offset;
+        
+        $this->db->select('o.id,o.order_bill_id,s.name as store_name,o.note,os.order_status_name,CONCAT_WS(" ",u.name,u.lname) as user_name,'
+                . ' o.order_date,o.payment_type,o.payment_status,o.created_on');
+        $this->db->from('order o');
+        $this->db->join('table_order_status os', 'os.order_status_id = o.status', 'left');
+        $this->db->join('stores s', 's.id = o.store_id', 'left');
+        $this->db->join('users u', 'u.user_id = o.user_id', 'left');
+        $this->db->order_by('o.created_on','DESC');
+        $this->db->limit($limit,$offset);
+        $query = $this->db->get();
+        return $query->result_array();
+    }
 
     /**
      * This function is used to get order details 
