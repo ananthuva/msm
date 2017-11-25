@@ -168,7 +168,7 @@ class Order extends CI_Controller {
         $offset = property_exists($content, 'offset') ? $content->offset : '';
         $orders = $this->Order_model->getOrderList($limit, $offset);
         $result = str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $orders)));
-        echo str_replace('}]', '}}', str_replace('[{', '{{', $result));
+        echo str_replace('[]', '{}',str_replace('}]', '}}', str_replace('[{', '{{', $result)));
         exit;
     }
 
@@ -191,7 +191,7 @@ class Order extends CI_Controller {
                 $data['attachments'] = $this->Order_model->getOrderAttachment($id);
                 $data['history'] = $this->Order_model->getOrderHistory($id);
                 $result = str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $data)));
-                echo str_replace('}]', '}}', str_replace('[{', '{{', $result));
+                echo str_replace('[]', '{}',str_replace('}]', '}}', str_replace('[{', '{{', $result)));
             }
         }
         exit;
