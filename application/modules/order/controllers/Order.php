@@ -36,9 +36,9 @@ class Order extends CI_Controller {
             exit;
         }
         $content = json_decode(file_get_contents("php://input"));
-        $this->process_ws_api();
-        if (isset($_SERVER['HTTP_TOKEN'])) {
-            if (process_token($_SERVER['HTTP_TOKEN'])) {
+
+        if (isset($content->token)) {
+            if (process_token($content->token)) {
                 $this->process_ws_api();
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Invalid Request Token'));
@@ -85,19 +85,19 @@ class Order extends CI_Controller {
             [ 'field' => 'delivery_mobile', 'label' => 'mobile in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_house_name', 'label' => 'House Name in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_street', 'label' => 'Street in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'delivery_post', 'label' => 'Postoffice in Delivery Address', 'rules' => 'required',],
+            //[ 'field' => 'delivery_post', 'label' => 'Postoffice in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_pin', 'label' => 'PIN in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_state_id', 'label' => 'State Id in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'latitude', 'label' => 'latitude', 'rules' => 'required',],
-            [ 'field' => 'longitude', 'label' => 'longitude', 'rules' => 'required',],
+            //[ 'field' => 'latitude', 'label' => 'latitude', 'rules' => 'required',],
+            //[ 'field' => 'longitude', 'label' => 'longitude', 'rules' => 'required',],
             [ 'field' => 'billing_full_name', 'label' => 'Name in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_mobile', 'label' => 'Mobile in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_house_name', 'label' => 'House Name in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_street', 'label' => 'Street in Billing Address', 'rules' => 'required',],
-            [ 'field' => 'billing_post', 'label' => 'Postoffice in Billing Address', 'rules' => 'required',],
+            //[ 'field' => 'billing_post', 'label' => 'Postoffice in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_pin', 'label' => 'PIN in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_state_id', 'label' => 'State Id in Billing Address', 'rules' => 'required',],
-            [ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
+            //[ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
         );
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {

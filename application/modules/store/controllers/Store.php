@@ -36,8 +36,8 @@ class Store extends CI_Controller {
             exit;
         }
         $content = json_decode(file_get_contents("php://input"));
-        if (isset($_SERVER['HTTP_TOKEN'])) {
-            if (process_token($_SERVER['HTTP_TOKEN'])) {
+        if (isset($content->token)) {
+            if (process_token($content->token)) {
                 $this->process_ws_api();
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Invalid Request Token'));
@@ -81,7 +81,20 @@ class Store extends CI_Controller {
             if (empty($return)) {
                 echo json_encode(array('status' => 'false', 'message' => 'No stores found'));
             } else {
-                echo str_replace(':null', ':""', json_encode(array('status' => 'true','message' => 'Request successful', 'Data' => $return)));
+                foreach($return as &$location){
+                    $geolocation = $location['latitude'].','.$location['longitude'];
+                    $request = 'http://maps.googleapis.com/maps/api/geocode/json?latlng='.$geolocation.'&sensor=false'; 
+                    $file_contents = file_get_contents($request);
+                    $json_decode = json_decode($file_contents);
+                    $address = '';
+                    if(isset($json_decode->results[0]) && isset($json_decode->results[0]->address_components)) {
+                        $address = isset($json_decode->results[0]->address_components[3]) ? $json_decode->results[0]->address_components[3] : '';
+                    }
+                    $location['location'] = !empty($address) ? isset($address->long_name) ? $address->long_name : '' : '';
+                    unset($location['latitude']);
+                    unset($location['longitude']);
+                }
+                echo str_replace(':null', ':""', json_encode(array('status' => 'true','message' => 'Request successful', 'StoreData' => $return)));
             }
         } else {
             echo json_encode(array('status' => 'false', 'message' => 'Invalid latitude or longitude'));

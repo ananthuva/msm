@@ -8,18 +8,6 @@ class Order_model extends SYS_Model {
     }
 
     /**
-     * This function is used authenticate user at login
-     */
-    function getNearbyStores() {
-        $latitude = ($this->input->post('latitude')) ? (double) $this->input->post('latitude') : 0;
-        $longitude = ($this->input->post('longitude')) ? (double) $this->input->post('longitude') : 0;
-        $query = 'SELECT id, name ,(6371 * ACOS(COS(RADIANS(' . $latitude . ')) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(' . $longitude . ')) +
-            SIN( RADIANS(' . $latitude . ') ) * SIN( RADIANS(latitude) ))) AS distance 
-            FROM stores HAVING distance < 5 ORDER BY distance LIMIT 0 , 20';
-        return $result = $this->db->query($query)->result_array();
-    }
-
-    /**
      * This function is used to delete
      * @param: $id - id of user table
      */
