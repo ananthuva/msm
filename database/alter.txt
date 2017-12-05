@@ -68,3 +68,20 @@ UPDATE `table_order_status` SET `order_status_name`='Processed' WHERE `order_sta
 INSERT INTO `table_order_status`(`order_status_id`,`order_status_name`) VALUES ( NULL,'Out For Delivery');
 INSERT INTO `table_order_status`(`order_status_id`,`order_status_name`) VALUES ( NULL,'Delivered');
 /******************************************************/
+
+CREATE TABLE `user_shipping_address` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `full_name` varchar(100) DEFAULT NULL,
+  `mobile` varchar(20) DEFAULT NULL,
+  `house_name` text,
+  `street` text,
+  `postoffice` varchar(200) DEFAULT NULL,
+  `pin` decimal(50,0) DEFAULT NULL,
+  `state_id` int(11) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_on` datetime DEFAULT '0000-00-00 00:00:00',
+  `last_modified_by` int(11) DEFAULT NULL,
+  `last_modified_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8

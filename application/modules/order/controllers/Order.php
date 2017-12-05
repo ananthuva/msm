@@ -63,6 +63,10 @@ class Order extends CI_Controller {
                     break;
                 case 'order_details' : $this->ws_oderDetails();
                     break;
+                case 'get_shipping_address' : $this->ws_getShippingAddress();
+                    break;
+                case 'save_shipping_address' : $this->ws_saveShippingAddress();
+                    break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
         } else {
@@ -118,7 +122,7 @@ class Order extends CI_Controller {
             if (empty($error)) {
                 $order['order_bill_id'] = 'Ord-' . date('YmdHis');
                 $order['store_id'] = (isset($content->store_id)) ? $content->store_id : '';
-                $order['note'] = $content->note;
+                $order['note'] = (isset($content->note)) ? $content->note : '';
                 $order['user_id'] = $content->user_id;
                 $order['order_date'] = date('Y-m-d');
                 $order_id = $this->Order_model->create('order', $order);
@@ -127,18 +131,18 @@ class Order extends CI_Controller {
                 $delivery['mobile'] = $content->delivery_mobile;
                 $delivery['house_name'] = $content->delivery_house_name;
                 $delivery['street'] = $content->delivery_street;
-                $delivery['postoffice'] = $content->delivery_post;
+                $delivery['postoffice'] = (isset($content->delivery_post)) ? $content->delivery_post : '';
                 $delivery['pin'] = $content->delivery_pin;
                 $delivery['state_id'] = $content->delivery_state_id;
-                $delivery['latitude'] = $content->latitude;
-                $delivery['longitude'] = $content->longitude;
+                $delivery['latitude'] = (isset($content->latitude)) ? $content->latitude : '';
+                $delivery['longitude'] = (isset($content->longitude)) ? $content->longitude : '';
                 $this->Order_model->insertRow('delivery_address', $delivery);
                 $billing['order_id'] = $order_id;
                 $billing['full_name'] = $content->billing_full_name;
                 $billing['mobile'] = (isset($content->billing_mobile)) ? $content->billing_mobile : '';
                 $billing['house_name'] = $content->billing_house_name;
                 $billing['street'] = $content->billing_street;
-                $billing['postoffice'] = $content->billing_post;
+                $billing['postoffice'] = (isset($content->billing_post)) ? $content->billing_post : '';
                 $billing['pin'] = $content->billing_pin;
                 $billing['state_id'] = $content->billing_state_id;
                 $this->Order_model->insertRow('billing_address', $billing);
@@ -192,6 +196,69 @@ class Order extends CI_Controller {
                 $data['history'] = $this->Order_model->getOrderHistory($id);
                 $result = str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $data)));
                 echo str_replace('[]', '{}',str_replace('}]', '}}', str_replace('[{', '{{', $result)));
+            }
+        }
+        exit;
+    }
+    
+    /**
+     * This function is used for getting shipping address
+     * @return String
+     */
+    public function ws_getShippingAddress() {
+        $content = json_decode(file_get_contents("php://input"));
+        $id = property_exists($content, 'user_id') ? $content->user_id : '';
+        if (empty($id)) {
+            echo json_encode(array('status' => 'false', 'message' => 'user_id is required'));
+        } else {
+            $data = $this->Order_model->getShippingAddress($id);
+            if (empty($data)) {
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid user_id'));
+            } else {
+                echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $data)));
+            }
+        }
+        exit;
+    }
+    
+    /**
+     * This function is used for saving user shipping address
+     * @return String
+     */
+    public function ws_saveShippingAddress() {
+        $content = json_decode(file_get_contents("php://input"));
+        $_POST = (array) $content;
+        $rules = array(
+            [ 'field' => 'user_id', 'label' => 'User id', 'rules' => 'required'],
+            [ 'field' => 'full_name', 'label' => 'Full Name', 'rules' => 'required'],
+            [ 'field' => 'mobile', 'label' => 'Mobile ', 'rules' => 'required'],
+            [ 'field' => 'house_name', 'label' => 'House Name', 'rules' => 'required'],
+            [ 'field' => 'street', 'label' => 'Street', 'rules' => 'required'],
+            [ 'field' => 'pin', 'label' => 'PIN', 'rules' => 'required'],
+            [ 'field' => 'state_id', 'label' => 'State Id', 'rules' => 'required']
+        );
+        $this->form_validation->set_rules($rules);
+        if (!$this->form_validation->run()) {
+            $errors = preg_replace("/\r|\n/", "", validation_errors(" ", " "));
+            $errors = ltrim(explode('.', $errors)[0]);
+            echo json_encode(array('status' => 'false', 'message' => $errors));
+        } else {
+            $shipping['user_id'] = $content->user_id;
+            $shipping['full_name'] = $content->full_name;
+            $shipping['mobile'] = $content->mobile;
+            $shipping['house_name'] = $content->house_name;
+            $shipping['street'] = $content->street;
+            $shipping['postoffice'] = (isset($content->post)) ? $content->post : '';
+            $shipping['pin'] = $content->pin;
+            $shipping['state_id'] = $content->state_id;
+            $data = $this->Order_model->getShippingAddress($content->user_id);
+            if(empty($data)){
+                $id = $this->Order_model->create('user_shipping_address', $shipping);
+                echo json_encode(array('status' => 'true', 'message' => 'Address Saved Successfully', 'insertId' => $id));
+            } else {
+                $where['user_id'] = $content->user_id;
+                $id = $this->Order_model->updateTableRow('user_shipping_address', $shipping, $where);
+                echo json_encode(array('status' => 'true', 'message' => 'Address Updated Successfully'));
             }
         }
         exit;

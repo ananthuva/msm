@@ -144,5 +144,18 @@ class Order_model extends SYS_Model {
         $query = $this->db->get();
         return $query->result_array();
     }
+    
+    /**
+     * This function is used to get ShippingAddress
+     */
+    public function getShippingAddress($id) {
+        $this->db->select('d.full_name,d.mobile,d.house_name,d.street,d.postoffice,d.pin,'
+                . 's.name as state_name');
+        $this->db->where('d.user_id', $id);
+        $this->db->from('user_shipping_address d');
+        $this->db->join('state s', 's.id = d.state_id', 'left');
+        $query = $this->db->get();
+        return $query->row_array();
+    }
 
 }

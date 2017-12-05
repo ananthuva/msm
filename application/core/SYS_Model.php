@@ -88,16 +88,16 @@ class SYS_Model extends CI_Model {
      * @param	array	where condition values
      * @return	string
      */
-//    function update($table, $params, $condition, $logUserInfo = TRUE) {
-//        if ($logUserInfo) {
-//            $this->db->set('last_modified_on', 'NOW()', FALSE);
-//            $params['last_modified_by'] = $this->user_id ;
-//        }
-//
-//        $this->db->where($condition);
-//        $this->db->update($table, $params);
-//        return $this->db->affected_rows();
-//    }
+    function updateTableRow($table, $params, $condition, $logUserInfo = TRUE) {
+        if ($logUserInfo) {
+            $this->db->set('last_modified_on', 'NOW()', FALSE);
+            $params['last_modified_by'] = $this->user_id ;
+        }
+
+        $this->db->where($condition);
+        $this->db->update($table, $params);
+        return $this->db->affected_rows();
+    }
 
     /**
      * Remove Data from the database 
