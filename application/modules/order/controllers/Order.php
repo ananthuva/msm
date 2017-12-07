@@ -36,7 +36,7 @@ class Order extends CI_Controller {
             exit;
         }
         $content = json_decode(file_get_contents("php://input"));
-
+        
         if (isset($content->token)) {
             if (process_token($content->token)) {
                 $this->process_ws_api();
@@ -115,7 +115,7 @@ class Order extends CI_Controller {
                     $error = $this->verify_attachment($attach);
                     if (!empty($error)) {
                         echo json_encode(array('status' => 'false', 'message' => $error));
-                        break;
+                        exit;
                     }
                 }
             }
@@ -171,8 +171,7 @@ class Order extends CI_Controller {
         $limit = property_exists($content, 'limit') ? $content->limit : '';
         $offset = property_exists($content, 'offset') ? $content->offset : '';
         $orders = $this->Order_model->getOrderList($limit, $offset);
-        $result = str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $orders)));
-        echo str_replace('[]', '{}',str_replace('}]', '}}', str_replace('[{', '{{', $result)));
+        echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $orders)));
         exit;
     }
 
@@ -194,8 +193,7 @@ class Order extends CI_Controller {
                 $data['delivery_details'] = $this->Order_model->getOrderDeliveryAddress($id);
                 $data['attachments'] = $this->Order_model->getOrderAttachment($id);
                 $data['history'] = $this->Order_model->getOrderHistory($id);
-                $result = str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $data)));
-                echo str_replace('[]', '{}',str_replace('}]', '}}', str_replace('[{', '{{', $result)));
+                echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $data)));
             }
         }
         exit;
@@ -330,7 +328,7 @@ class Order extends CI_Controller {
         if ($file_byte_size > 10485760) {
             $error_upload = "Attachment exceeds allowed file size";
         } else {
-            $allowed_type = array("image/png", "image/jpeg", "image/gif", "application/pdf", "application/zip", "application/xls", "text/plain", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/msword", "application/octet-stream", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+            $allowed_type = array("image/png", "image/jpeg", "image/gif", "application/pdf", "application/zip", "application/xls", "text/plain", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
             if (!in_array($mime_type, $allowed_type)) {
                 $error_upload = "Attachment has an invalid extension";
             }
