@@ -622,7 +622,7 @@ class User extends CI_Controller {
         $this->form_validation->set_rules('mobile_no', 'Mobile Number', 'trim|numeric|exact_length[10]');
         $this->form_validation->set_rules('name', 'First Name', 'trim|required');
         $this->form_validation->set_rules('dob', 'Date of Birth', 'trim|required');
-        if ($id != '') {
+        if ($id != '' && $this->input->post('register')) {
             $this->form_validation->set_rules('password', 'Password', 'trim|required');
         }
         if ($this->form_validation->run() === TRUE) {
@@ -646,11 +646,11 @@ class User extends CI_Controller {
                                 $password = password_hash($this->input->post('password'), PASSWORD_DEFAULT);
                                 $data['password'] = $password;
                             } else {
-                                $this->session->set_flashdata('messagePr', 'Password and confirm password should be same...');
+                                $this->session->set_flashdata('messagePr', 'Password Mismatching');
                                 redirect(base_url() . 'user/' . $redirect, 'refresh');
                             }
                         } else {
-                            $this->session->set_flashdata('messagePr', 'Enter Valid Current Password...');
+                            $this->session->set_flashdata('messagePr', 'Incorrect Current Password');
                             redirect(base_url() . 'user/' . $redirect, 'refresh');
                         }
                     } else {
@@ -672,7 +672,7 @@ class User extends CI_Controller {
                 }
                 $data['profile_pic'] = $profile_pic;
                 $this->User_model->updateRow('users', 'user_id', $id, $data);
-                $this->session->set_flashdata('messagePr', 'Your data updated Successfully..');
+                $this->session->set_flashdata('messagePr', 'Data updated Successfully');
                 redirect(base_url() . 'user/' . $redirect, 'refresh');
             } else {
                 if ($this->input->post('user_type') != 'admin') {

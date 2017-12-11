@@ -49,7 +49,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="">Mobile Number</label>
-                    <input type="text" name="mobile_no" value="<?php echo isset($userData->mobile_no) ? $userData->mobile_no : ''; ?>" class="form-control" placeholder="Mobile Number">
+                    <input type="text" pattern="\d*" maxlength="10" name="mobile_no" value="<?php echo isset($userData->mobile_no) ? str_replace('+91','',$userData->mobile_no) : ''; ?>" class="form-control" placeholder="Mobile Number">
                 </div>
             </div>
 
@@ -77,6 +77,13 @@
                 </div> 
             </div>
             
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="">Date of Birth</label>
+                    <input style="cursor: pointer" readonly='true' required type="text" id="dob" name="dob" value="<?php echo isset($userData->dob) ? date('d-m-Y',strtotime($userData->dob)) : ''; ?>" class="form-control" placeholder="Dob">
+                </div>
+            </div>
+            
             <div class="col-md-12">
                 <div class="form-group">
                     <label for="">Address</label>
@@ -92,29 +99,21 @@
                         <input type="Password" name="currentpassword" class="form-control" value="" placeholder="Password">
                     </div>
                 </div>
-            <?php } else {
-                ?>
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="">Password</label>
-                        <input required type="Password" name="password" class="form-control" value="" placeholder="Password" readonly onfocus="this.removeAttribute('readonly')">
-                    </div>
-                </div>
-            <?php } if (isset($userData)) { ?>
+            <?php } ?>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="">Password</label>
+                        <label for="">New Password</label>
                         <input type="Password" name="password" class="form-control" value="" placeholder="Password">
                     </div>
                 </div>
+                
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="">Confirm Password</label>
                         <input type="Password" name="confirmPassword" class="form-control" value="" placeholder="Password">
                     </div>
                 </div>
-                        <?php } ?>
-
+            
                 <div class="col-md-12"> 
                     <div class="form-group imsize">
                         <label for="exampleInputFile">Image Upload</label>
@@ -145,3 +144,25 @@
         <?php } ?>
     </div>
 </form>
+<script>
+    $( "#dob" ).datepicker({
+        changeMonth: true,
+        changeYear: true,
+        autoSize: true,
+        dateFormat: 'dd-mm-yy',
+        yearRange: "-70:+0",
+        maxDate: "+0D"
+    });
+</script>
+<style>
+    /* For Firefox */
+input[type='number'] {
+    -moz-appearance:textfield;
+}
+/* Webkit browsers like Safari and Chrome */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+</style>

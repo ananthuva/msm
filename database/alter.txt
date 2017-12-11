@@ -84,4 +84,6 @@ CREATE TABLE `user_shipping_address` (
   `last_modified_by` int(11) DEFAULT NULL,
   `last_modified_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `users`     CHANGE `created_on` `created_on` DATETIME NULL ;

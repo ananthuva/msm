@@ -62,6 +62,7 @@
                       } */
                     ?>
                     </select>-->
+                    <input type="hidden" name="register" class="form-control" value="1"> 
                     <input type="hidden" name="user_type" class="form-control" value="Member"> 
                     <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
                 </div>
