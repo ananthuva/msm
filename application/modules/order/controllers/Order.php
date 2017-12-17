@@ -36,7 +36,7 @@ class Order extends CI_Controller {
             exit;
         }
         $content = json_decode(file_get_contents("php://input"));
-        
+
         if (isset($content->token)) {
             if (process_token($content->token)) {
                 $this->process_ws_api();
@@ -66,6 +66,8 @@ class Order extends CI_Controller {
                 case 'get_shipping_address' : $this->ws_getShippingAddress();
                     break;
                 case 'save_shipping_address' : $this->ws_saveShippingAddress();
+                    break;
+                case 'payment_request' : $this->ws_paymentRequest();
                     break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
@@ -101,7 +103,7 @@ class Order extends CI_Controller {
             //[ 'field' => 'billing_post', 'label' => 'Postoffice in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_pin', 'label' => 'PIN in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_state_id', 'label' => 'State Id in Billing Address', 'rules' => 'required',],
-            //[ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
+                //[ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
         );
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {
@@ -198,7 +200,7 @@ class Order extends CI_Controller {
         }
         exit;
     }
-    
+
     /**
      * This function is used for getting shipping address
      * @return String
@@ -218,7 +220,7 @@ class Order extends CI_Controller {
         }
         exit;
     }
-    
+
     /**
      * This function is used for saving user shipping address
      * @return String
@@ -250,7 +252,7 @@ class Order extends CI_Controller {
             $shipping['pin'] = $content->pin;
             $shipping['state_id'] = $content->state_id;
             $data = $this->Order_model->getShippingAddress($content->user_id);
-            if(empty($data)){
+            if (empty($data)) {
                 $id = $this->Order_model->create('user_shipping_address', $shipping);
                 echo json_encode(array('status' => 'true', 'message' => 'Address Saved Successfully', 'insertId' => $id));
             } else {
@@ -334,6 +336,90 @@ class Order extends CI_Controller {
             }
         }
         return $error_upload;
+    }
+
+    public function ws_paymentRequest() {
+        $content = json_decode(file_get_contents("php://input"));
+        $_POST = (array) $content;
+        $rules = array(
+            [ 'field' => 'user_id', 'label' => 'User id', 'rules' => 'required'],
+            [ 'field' => 'full_name', 'label' => 'Full Name', 'rules' => 'required'],
+            [ 'field' => 'mobile', 'label' => 'Mobile ', 'rules' => 'required'],
+            [ 'field' => 'order_id', 'label' => 'Order id Name', 'rules' => 'required'],
+            [ 'field' => 'amount', 'label' => 'Amount', 'rules' => 'required'],
+            [ 'field' => 'email', 'label' => 'email', 'rules' => 'required']
+        );
+        $this->form_validation->set_rules($rules);
+        if (!$this->form_validation->run()) {
+            $errors = preg_replace("/\r|\n/", "", validation_errors(" ", " "));
+            $errors = ltrim(explode('.', $errors)[0]);
+            echo json_encode(array('status' => 'false', 'message' => $errors));
+        } else {
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, 'https://test.instamojo.com/api/1.1/payment-requests/');
+            curl_setopt($ch, CURLOPT_HEADER, FALSE);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array("X-Api-Key:test_9f9c491d610e76044e93a80253a",
+                "X-Auth-Token:test_e4689a8b31f52210b2a759c8f13"));
+            $payload = Array(
+                'purpose' => 'Order Number :' . $content->order_id,
+                'amount' => $content->amount,
+                'phone' => $content->mobile,
+                'buyer_name' => $content->full_name,
+                'redirect_url' => 'http://mindmediainnovations.xyz.fozzyhost.com/order/paymentResult/',
+                'send_email' => true,
+                'webhook' => '',
+                'send_sms' => false,
+                'email' => $content->email,
+                'allow_repeated_payments' => false
+            );
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
+            $response = curl_exec($ch);
+            curl_close($ch);
+            $json_decode = json_decode($response, true);
+            if ($json_decode['success']) {
+                $long_url = $json_decode['payment_request']['longurl'];
+                echo json_encode(array('status' => 'true', 'message' => 'Payment Url Generated', 'url' => $long_url));
+            } else {
+                echo json_encode(array('status' => 'false', 'message' => 'Payment Request Failed'));
+            }
+        }
+    }
+
+    public function paymentResult() {
+        /*
+          Basic PHP script to handle Instamojo RAP webhook.
+         */
+
+        $data = $_POST;
+        $mac_provided = $data['mac'];  // Get the MAC from the POST data
+        unset($data['mac']);  // Remove the MAC key from the data.
+        $ver = explode('.', phpversion());
+        $major = (int) $ver[0];
+        $minor = (int) $ver[1];
+        if ($major >= 5 and $minor >= 4) {
+            ksort($data, SORT_STRING | SORT_FLAG_CASE);
+        } else {
+            uksort($data, 'strcasecmp');
+        }
+        // You can get the 'salt' from Instamojo's developers page(make sure to log in first): https://www.instamojo.com/developers
+        // Pass the 'salt' without <>
+        $mac_calculated = hash_hmac("sha1", implode("|", $data), "11872bb24009482484aa041d2b708080");
+        if ($mac_provided == $mac_calculated) {
+            if ($data['status'] == "Credit") {
+                print_r($data);
+                // Payment was successful, mark it as successful in your database.
+                // You can acess payment_request_id, purpose etc here. 
+            } else {
+                // Payment was unsuccessful, mark it as failed in your database.
+                // You can acess payment_request_id, purpose etc here.
+            }
+        } else {
+            echo "MAC mismatch";
+        }
     }
 
     /**
