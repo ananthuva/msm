@@ -381,8 +381,7 @@ class Order extends CI_Controller {
             curl_close($ch);
             $json_decode = json_decode($response, true);
             if ($json_decode['success']) {
-                $long_url = $json_decode['payment_request']['longurl'];
-                echo json_encode(array('status' => 'true', 'message' => 'Payment Url Generated', 'url' => $long_url));
+                echo json_encode(array('status' => 'true', 'message' => 'Payment Url Generated', 'Data' => $json_decode));
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Payment Request Failed'));
             }
