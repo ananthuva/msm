@@ -7,6 +7,7 @@ class User extends CI_Controller {
     function __construct() {
         parent::__construct();
         $this->load->model('User_model');
+        $this->load->helper('download');
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->user_id : '1';
     }
 
@@ -34,6 +35,8 @@ class User extends CI_Controller {
                 case 'generate_otp' : $this->ws_sendOTPtoMobile();
                     break;
                 case 'verify_otp' : $this->ws_verifyMobileNumber();
+                    break;
+                case 'get_token' : $this->ws_getToken();
                     break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
@@ -80,7 +83,46 @@ class User extends CI_Controller {
         }
         exit;
     }
-
+    
+    /**
+     * This function is used for genrating token file
+     * @return String
+     */
+    public function ws_getToken() {
+        $content = json_decode(file_get_contents("php://input"));
+        if (!empty($content->email) && !empty($content->password)) {
+            $_POST['email'] = $content->email;
+            $_POST['password'] = $content->password;
+            $return = $this->User_model->auth_user();
+            if (empty($return)) {
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid username or password'));
+            } else {
+                if ($return == 'not_verified') {
+                    echo json_encode(array('status' => 'false', 'message' => 'Accout not verified.'));
+                } else if (isset($return['number_not_verified']) && !empty($return['number_not_verified'])) {
+                    echo json_encode(array('status' => 'false', 'message' => 'User mobile not verified'));
+                } else {
+                    $UserData = (array) $return[0];
+                    $key = $this->randomString();
+                    $token = simple_crypt($UserData['email'], $key);
+                    $hash = password_hash($UserData['email'], PASSWORD_DEFAULT);
+                    $this->User_model->updateRow('users', 'user_id', $UserData['user_id'], array('hash' => $hash));
+                    unset($UserData['password']);
+                    unset($UserData['var_key']);
+                    unset($UserData['is_deleted']);
+                    unset($UserData['var_otp']);
+                    unset($UserData['created_by']);
+                    unset($UserData['hash']);
+                    $data = str_replace(':null', ':""', json_encode(array('token' => $token . ':' . $key)));
+                    force_download('token.json', $data);
+                }
+            }
+        } else {
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid username or password'));
+        }
+        exit;
+    }
+    
     /**
      * This function is used for api registration
      * @return String
