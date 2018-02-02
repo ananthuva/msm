@@ -7,6 +7,7 @@ class Order extends CI_Controller {
     function __construct() {
         parent::__construct();
         $this->load->model('Order_model');
+        $this->load->helper('download');
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->user_id : '1';
     }
 
@@ -68,6 +69,8 @@ class Order extends CI_Controller {
                 case 'save_shipping_address' : $this->ws_saveShippingAddress();
                     break;
                 case 'payment_request' : $this->ws_paymentRequest();
+                    break;
+                case 'get_token' : $this->ws_get_token();
                     break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
@@ -387,6 +390,46 @@ class Order extends CI_Controller {
             }
         }
     }
+
+    public function ws_get_token() {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://test.instamojo.com/oauth2/token/');
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("content-type:application/x-www-form-urlencoded",
+            "cache-control:no-cache"));
+        $payload = Array(
+            'grant_type' => "client_credentials",
+            'client_id' => "test_HdAW9ROYUVPxigpd8FkdSuwaHMm1WLlzuL7",
+            'client_secret' => "test_PcMYl0V2gmpZc9tLOUCT7P6SOO9QInkqy0p51XvzehDe2QhFu4Ai5D5dLHjl7lnZYSVD1k7Wx62yYVEDTikBqRl2uZG3nH3ssIJMUL1YBLVWtTHmKdMfrpybSyL",
+        );
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
+        $response = curl_exec($ch);
+        curl_close($ch);
+        echo $response;
+    }
+    
+//    public function ws_download_token() {
+//        $ch = curl_init();
+//        curl_setopt($ch, CURLOPT_URL, 'https://test.instamojo.com/oauth2/token/');
+//        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+//        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+//        curl_setopt($ch, CURLOPT_HTTPHEADER, array("content-type:application/x-www-form-urlencoded",
+//            "cache-control:no-cache"));
+//        $payload = Array(
+//            'grant_type' => "client_credentials",
+//            'client_id' => "test_HdAW9ROYUVPxigpd8FkdSuwaHMm1WLlzuL7",
+//            'client_secret' => "test_PcMYl0V2gmpZc9tLOUCT7P6SOO9QInkqy0p51XvzehDe2QhFu4Ai5D5dLHjl7lnZYSVD1k7Wx62yYVEDTikBqRl2uZG3nH3ssIJMUL1YBLVWtTHmKdMfrpybSyL",
+//        );
+//        curl_setopt($ch, CURLOPT_POST, true);
+//        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
+//        $response = curl_exec($ch);
+//        curl_close($ch);
+//        force_download('token.json', $response);
+//    }
 
     public function paymentResult() {
         /*
