@@ -407,10 +407,23 @@ class Order extends CI_Controller {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
         $response = curl_exec($ch);
+        if(curl_error($ch)){
+            $output['error'] = curl_error($ch);
+        } else {
+            $result = (array) json_decode($response);
+            if(isset($result['error'])) {
+                $output['error'] = $result['error'];
+            } else if(isset($result['access_token'])){
+                $result['access_token'] = 'test' . $result['access_token'];
+                $output = $result;
+            } else {
+                $output['error'] = 'unable to process request.';
+            }
+        }
+        echo json_encode($output);
         curl_close($ch);
-        echo $response;
     }
-    
+
 //    public function ws_download_token() {
 //        $ch = curl_init();
 //        curl_setopt($ch, CURLOPT_URL, 'https://test.instamojo.com/oauth2/token/');
