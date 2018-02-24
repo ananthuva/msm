@@ -87,3 +87,4 @@ CREATE TABLE `user_shipping_address` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `users`     CHANGE `created_on` `created_on` DATETIME NULL ;
+ALTER TABLE `order`     ADD COLUMN `amount` FLOAT(10) DEFAULT '00.00' NULL AFTER `order_date`;

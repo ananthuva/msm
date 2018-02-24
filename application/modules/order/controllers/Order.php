@@ -70,7 +70,7 @@ class Order extends CI_Controller {
                     break;
                 case 'payment_request' : $this->ws_paymentRequest();
                     break;
-                case 'get_token' : $this->ws_get_token();
+                case 'set_quote' : $this->ws_set_quote();
                     break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
@@ -407,13 +407,13 @@ class Order extends CI_Controller {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
         $response = curl_exec($ch);
-        if(curl_error($ch)){
+        if (curl_error($ch)) {
             $output['error'] = curl_error($ch);
         } else {
             $result = (array) json_decode($response);
-            if(isset($result['error'])) {
+            if (isset($result['error'])) {
                 $output['error'] = $result['error'];
-            } else if(isset($result['access_token'])){
+            } else if (isset($result['access_token'])) {
                 $result['access_token'] = 'test' . $result['access_token'];
                 $output = $result;
             } else {
@@ -424,25 +424,70 @@ class Order extends CI_Controller {
         curl_close($ch);
     }
 
-//    public function ws_download_token() {
-//        $ch = curl_init();
-//        curl_setopt($ch, CURLOPT_URL, 'https://test.instamojo.com/oauth2/token/');
-//        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-//        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-//        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-//        curl_setopt($ch, CURLOPT_HTTPHEADER, array("content-type:application/x-www-form-urlencoded",
-//            "cache-control:no-cache"));
-//        $payload = Array(
-//            'grant_type' => "client_credentials",
-//            'client_id' => "test_HdAW9ROYUVPxigpd8FkdSuwaHMm1WLlzuL7",
-//            'client_secret' => "test_PcMYl0V2gmpZc9tLOUCT7P6SOO9QInkqy0p51XvzehDe2QhFu4Ai5D5dLHjl7lnZYSVD1k7Wx62yYVEDTikBqRl2uZG3nH3ssIJMUL1YBLVWtTHmKdMfrpybSyL",
-//        );
-//        curl_setopt($ch, CURLOPT_POST, true);
-//        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
-//        $response = curl_exec($ch);
-//        curl_close($ch);
-//        force_download('token.json', $response);
-//    }
+    public function ws_download_token() {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://test.instamojo.com/oauth2/token/');
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array("content-type:application/x-www-form-urlencoded",
+            "cache-control:no-cache"));
+        $payload = Array(
+            'grant_type' => "client_credentials",
+            'client_id' => "test_HdAW9ROYUVPxigpd8FkdSuwaHMm1WLlzuL7",
+            'client_secret' => "test_PcMYl0V2gmpZc9tLOUCT7P6SOO9QInkqy0p51XvzehDe2QhFu4Ai5D5dLHjl7lnZYSVD1k7Wx62yYVEDTikBqRl2uZG3nH3ssIJMUL1YBLVWtTHmKdMfrpybSyL",
+        );
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
+        $response = curl_exec($ch);
+        curl_close($ch);
+        header("Content-type: text/json");
+        header("Content-Disposition: attachment; filename=token.json");
+        echo $response;
+    }
+
+    /**
+     * This function is used for saving order quote from stores
+     * @return String
+     */
+    public function ws_set_quote() {
+        $content = json_decode(file_get_contents("php://input"));
+        $_POST = (array) $content;
+        $rules = array(
+            [ 'field' => 'user_id', 'label' => 'User id', 'rules' => 'required'],
+            [ 'field' => 'order_id', 'label' => 'Order ID', 'rules' => 'required'],
+            [ 'field' => 'store_id', 'label' => 'Store ID', 'rules' => 'required'],
+            [ 'field' => 'amount', 'label' => 'Amount', 'rules' => 'required']
+        );
+        $this->form_validation->set_rules($rules);
+        if (!$this->form_validation->run()) {
+            $errors = preg_replace("/\r|\n/", "", validation_errors(" ", " "));
+            $errors = ltrim(explode('.', $errors)[0]);
+            echo json_encode(array('status' => 'false', 'message' => $errors));
+        } else {
+            $data = $this->Order_model->getOrderdetails($content->order_id);
+            if (!empty($data)) {
+                if ($data['order_status_name'] != 'Send Prescription') {
+                    echo json_encode(array('status' => 'false', 'message' => 'Order already quoted'));
+                } else {
+                    $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
+                    $user = $this->Order_model->get_data_by('users', $content->user_id, 'user_id');
+                    if (empty($store) || empty($user)) {
+                        echo json_encode(array('status' => 'false', 'message' => 'Invalid data in request'));
+                    } else {
+                        $result = $this->Order_model->get_data_by('table_order_status', 'Get Quote', 'order_status_name');
+                        $order_status = (!empty($result)) ? $result[0]->order_status_id : 2;
+                        $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $content->store_id, 'last_modified_by' => $content->user_id));
+                        $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $content->store_id, 'created_by' => $content->user_id));
+                        echo json_encode(array('status' => 'true', 'message' => 'Order Quoted Successfully'));
+                    }
+                }
+            } else {
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid Order ID'));
+            }
+        }
+        exit;
+    }
 
     public function paymentResult() {
         /*
