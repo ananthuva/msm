@@ -468,18 +468,18 @@ class Order extends CI_Controller {
             $data = $this->Order_model->getOrderdetails($content->order_id);
             if (!empty($data)) {
                 if ($data['order_status_name'] != 'Send Prescription') {
-                    echo json_encode(array('status' => 'false', 'message' => 'Order already quoted'));
+                    echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
                 } else {
                     $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
                     $user = $this->Order_model->get_data_by('users', $content->user_id, 'user_id');
                     if (empty($store) || empty($user)) {
-                        echo json_encode(array('status' => 'false', 'message' => 'Invalid data in request'));
+                        echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
                     } else {
                         $result = $this->Order_model->get_data_by('table_order_status', 'Get Quote', 'order_status_name');
                         $order_status = (!empty($result)) ? $result[0]->order_status_id : 2;
                         $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $content->store_id, 'last_modified_by' => $content->user_id));
                         $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $content->store_id, 'created_by' => $content->user_id));
-                        echo json_encode(array('status' => 'true', 'message' => 'Order Quoted Successfully'));
+                        echo json_encode(array('status' => 'true', 'message' => 'Order Confirmed Successfully'));
                     }
                 }
             } else {

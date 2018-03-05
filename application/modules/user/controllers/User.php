@@ -165,7 +165,7 @@ class User extends CI_Controller {
             $data['mobile_no'] = '+91' . $content->mobile_no;
             $data['email'] = $content->email;
             $data['dob'] = date("Y-m-d", strtotime($content->dob));
-            $data['user_type'] = 'Member';
+            $data['user_type'] = ($content->user_type && !empty($content->user_type)) ? $content->user_type : 'Member';
             $data['password'] = $password;
             $data['profile_pic'] = 'user.png';
             $data['is_deleted'] = 0;
