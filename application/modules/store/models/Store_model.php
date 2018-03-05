@@ -71,7 +71,7 @@ class Store_model extends SYS_Model {
      * This function is used to select data form table  
      */
     function getStoreUsers() {
-        $this->db->where('user_type', 'pharmasist');
+        $this->db->where('user_type', 'pharmacist');
         $this->db->where('is_deleted', '0');
         $this->db->where('status', 'active');
         $this->db->select('CONCAT_WS(" ",name,lname ) AS user_name,user_id');
