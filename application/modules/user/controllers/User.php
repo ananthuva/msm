@@ -38,6 +38,8 @@ class User extends CI_Controller {
                     break;
                 case 'get_token' : $this->ws_getToken();
                     break;
+                case 'save_reg_id' : $this->ws_saveRegId();
+                    break; 
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
         } else {
@@ -227,6 +229,37 @@ class User extends CI_Controller {
             }
         } else {
             echo json_encode(array('status' => 'false', 'message' => 'Invalid user_id or otp'));
+        }
+        exit;
+    }
+    
+      /**
+     * This function is used for saving client firebase registration id
+     * @return String
+     */
+    public function ws_saveRegId() {
+        if (strcasecmp($_SERVER['REQUEST_METHOD'], 'POST') != 0) {
+            echo json_encode(array('status' => 'false', 'message' => 'Request method must be POST!'));
+            exit;
+        }
+        $content = json_decode(file_get_contents("php://input"));
+
+        if (isset($content->token)) {
+            if (process_token($content->token)) {
+                if (empty($content->user_id)) {
+                    echo json_encode(array('status' => 'false', 'message' => 'Invalid user id'));
+                } else if (empty($content->reg_id)) {
+                    echo json_encode(array('status' => 'false', 'message' => 'Invalid registration id'));
+                } else {
+                    $user_id = $content->user_id;
+                    $this->User_model->updateRow('users', 'user_id', $user_id, array('firebase_reg_id' => $content->reg_id));
+                    echo json_encode(array('status' => 'true', 'message' => 'Registration id updated'));
+                }
+            } else {
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid Request Token'));
+            }
+        } else {
+            echo json_encode(array('status' => 'false', 'message' => 'Unauthorized Request'));
         }
         exit;
     }

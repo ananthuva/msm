@@ -89,3 +89,4 @@ CREATE TABLE `user_shipping_address` (
 ALTER TABLE `users`     CHANGE `created_on` `created_on` DATETIME NULL ;
 ALTER TABLE `order`     ADD COLUMN `amount` FLOAT(10) DEFAULT '00.00' NULL AFTER `order_date`;
 ALTER TABLE `users`     CHANGE `user_type` `user_type` ENUM('admin','member','pharmacist') CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL ;
+ALTER TABLE `users`     ADD COLUMN `firebase_reg_id` VARCHAR(255) NULL AFTER `last_purchased_on`;
