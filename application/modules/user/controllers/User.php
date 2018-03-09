@@ -57,6 +57,7 @@ class User extends CI_Controller {
         if (!empty($content->email) && !empty($content->password)) {
             $_POST['email'] = $content->email;
             $_POST['password'] = $content->password;
+            $firebase_reg_id = (isset($content->device_token)) ? $content->device_token : '';
             $return = $this->User_model->auth_user();
             if (empty($return)) {
                 echo json_encode(array('status' => 'false', 'message' => 'Invalid username or password'));
@@ -71,6 +72,9 @@ class User extends CI_Controller {
                     $token = simple_crypt($UserData['email'], $key);
                     $hash = password_hash($UserData['email'], PASSWORD_DEFAULT);
                     $this->User_model->updateRow('users', 'user_id', $UserData['user_id'], array('hash' => $hash));
+                    if(!empty($firebase_reg_id)){
+                        $this->User_model->updateRow('users', 'user_id', $UserData['user_id'], array('firebase_reg_id' => $firebase_reg_id));
+                    }
                     unset($UserData['password']);
                     unset($UserData['var_key']);
                     unset($UserData['is_deleted']);
