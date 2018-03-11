@@ -86,7 +86,7 @@ class Order_model extends SYS_Model {
      */
     public function getOrderdetails($id) {
         $this->db->select('o.id,o.order_bill_id,s.name as store_name,o.note,os.order_status_name,CONCAT_WS(" ",u.name,u.lname) as user_name,'
-                . ' o.order_date,o.payment_type,o.payment_status,o.created_on');
+                . ' o.order_date,o.payment_type,o.payment_status,o.created_on,o.user_id');
         $this->db->where('o.id', $id);
         $this->db->from('order o');
         $this->db->join('table_order_status os', 'os.order_status_id = o.status', 'left');

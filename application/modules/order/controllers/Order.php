@@ -161,6 +161,8 @@ class Order extends CI_Controller {
                         }
                     }
                 }
+                
+                $this->sendNotification('pharmacist', 'There is a new order request.', 'Order '. $order['order_bill_id']);
                 echo json_encode(array('status' => 'true', 'message' => 'Order successful', 'orderId' => $order_id));
             }
         }
@@ -178,6 +180,27 @@ class Order extends CI_Controller {
         $orders = $this->Order_model->getOrderList($limit, $offset);
         echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $orders)));
         exit;
+    }
+
+    /**
+     * This function is used for sending fcm notification
+     * @return String
+     */
+    public function sendNotification($user_type = NULL, $body, $title, $user_id = NULL) {
+        if($user_type != '') {
+            $users = $this->Order_model->get_data_by('users', $user_type, 'user_type');
+        } else {
+            $users = $this->Order_model->get_data_by('users', $user_id, 'user_id');
+        }
+        $registrationIDs = [];
+        foreach($users as $user){
+            if($user->firebase_reg_id != ''){
+                $registrationIDs[] = $user->firebase_reg_id;
+            }
+        }
+        if(!empty($registrationIDs)) {
+            push_notification($registrationIDs, $body, $title);
+        }
     }
 
     /**
@@ -479,6 +502,7 @@ class Order extends CI_Controller {
                         $order_status = (!empty($result)) ? $result[0]->order_status_id : 2;
                         $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $content->store_id, 'last_modified_by' => $content->user_id));
                         $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $content->store_id, 'created_by' => $content->user_id));
+                        $this->sendNotification('', 'Order status updated', 'Order - '.$data['order_bill_id'], $data['user_id']);
                         echo json_encode(array('status' => 'true', 'message' => 'Order Confirmed Successfully'));
                     }
                 }
