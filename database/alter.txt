@@ -90,3 +90,33 @@ ALTER TABLE `users`     CHANGE `created_on` `created_on` DATETIME NULL ;
 ALTER TABLE `order`     ADD COLUMN `amount` FLOAT(10) DEFAULT '00.00' NULL AFTER `order_date`;
 ALTER TABLE `users`     CHANGE `user_type` `user_type` ENUM('admin','member','pharmacist') CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL ;
 ALTER TABLE `users`     ADD COLUMN `firebase_reg_id` VARCHAR(255) NULL AFTER `last_purchased_on`;
+
+/*************************************************/
+
+CREATE TABLE `payment` (
+  `id` bigint(121) NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(121) NOT NULL,
+  `payment_id` varchar(255) DEFAULT NULL,
+  `imj_status` char(100) DEFAULT NULL,
+  `payment_status` varchar(300) DEFAULT NULL,
+  `currency` char(20) DEFAULT NULL,
+  `amount` decimal(15,2) DEFAULT NULL,
+  `buyer_name` varchar(300) DEFAULT NULL,
+  `buyer_phone` varchar(50) DEFAULT NULL,
+  `buyer_email` varchar(300) DEFAULT NULL,
+  `shipping_address` text,
+  `shipping_city` varchar(300) DEFAULT NULL,
+  `shipping_state` varchar(300) DEFAULT NULL,
+  `shipping_zip` varchar(20) DEFAULT NULL,
+  `shipping_country` varchar(300) DEFAULT NULL,
+  `quantity` int(121) DEFAULT NULL,
+  `unit_price` decimal(15,2) DEFAULT NULL,
+  `fees` decimal(15,2) DEFAULT NULL,
+  `affiliate_commission` decimal(15,2) DEFAULT NULL,
+  `payment_request` text,
+  `instrument_type` char(50) DEFAULT NULL,
+  `failure` varchar(300) DEFAULT NULL,
+  `created_at` varchar(300) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+

@@ -70,6 +70,8 @@ class Order extends CI_Controller {
                     break;
                 case 'payment_request' : $this->ws_paymentRequest();
                     break;
+                case 'save_payment_details' : $this->ws_savePaymentDetails();
+                    break;
                 case 'set_quote' : $this->ws_set_quote();
                     break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
@@ -410,6 +412,41 @@ class Order extends CI_Controller {
                 echo json_encode(array('status' => 'true', 'message' => 'Payment Url Generated', 'Data' => $json_decode));
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Payment Request Failed'));
+            }
+        }
+    }
+    
+    public function ws_savePaymentDetails() {
+        $content = json_decode(file_get_contents("php://input"));
+        $_POST = (array) $content;
+        $rules = array(
+            [ 'field' => 'paymentId', 'label' => 'Payment id', 'rules' => 'required'],
+            [ 'field' => 'orderId', 'label' => 'Order id', 'rules' => 'required'],
+        );
+        $this->form_validation->set_rules($rules);
+        if (!$this->form_validation->run()) {
+            $errors = preg_replace("/\r|\n/", "", validation_errors(" ", " "));
+            $errors = ltrim(explode('.', $errors)[0]);
+            echo json_encode(array('status' => 'false', 'message' => $errors));
+        } else {
+            $url = 'https://test.instamojo.com/api/1.1/payments/'. $content->paymentId;
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'MOJO8313005A42887473/');
+            curl_setopt($ch, CURLOPT_HEADER, FALSE);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+            curl_setopt($ch, CURLOPT_HTTPHEADER,
+                        array("X-Api-Key:test_9f9c491d610e76044e93a80253a",
+                            "X-Auth-Token:test_e4689a8b31f52210b2a759c8f13"));
+
+            $response = curl_exec($ch);
+            curl_close($ch);
+            $order['log'] = $response;
+            $json_decode = json_decode($response, true);
+            if ($json_decode['success']) {
+                echo json_encode(array('status' => 'true', 'message' => 'Payment Details Saved', 'Data' => $json_decode));
+            } else {
+                echo json_encode(array('status' => 'false', 'message' => 'Cannot get Payment Details'));
             }
         }
     }
