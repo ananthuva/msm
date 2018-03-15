@@ -431,7 +431,7 @@ class Order extends CI_Controller {
         } else {
             $url = 'https://test.instamojo.com/api/1.1/payments/'. $content->paymentId;
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'MOJO8313005A42887473/');
+            curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_HEADER, FALSE);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
@@ -441,13 +441,43 @@ class Order extends CI_Controller {
 
             $response = curl_exec($ch);
             curl_close($ch);
-            $order['log'] = $response;
             $json_decode = json_decode($response, true);
             if ($json_decode['success']) {
+                $this->savePaymentDataToDB($content->orderId,$json_decode);
                 echo json_encode(array('status' => 'true', 'message' => 'Payment Details Saved', 'Data' => $json_decode));
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Cannot get Payment Details'));
             }
+        }
+    }
+    
+    public function savePaymentDataToDB($order_id , $json_decode) {
+        $payment['order_id'] = $order_id;
+        $payment['payment_id'] = $json_decode['payment']['payment_id'];
+        $payment['imj_status'] = $json_decode['payment']['status'];
+        $payment['payment_status'] = $json_decode['payment']['status'];
+        $payment['currency'] = $json_decode['payment']['currency'];
+        $payment['amount'] = $json_decode['payment']['amount'];
+        $payment['buyer_name'] = $json_decode['payment']['buyer_name'];
+        $payment['buyer_phone'] = $json_decode['payment']['buyer_phone'];
+        $payment['buyer_email'] = $json_decode['payment']['buyer_email'];
+        $payment['shipping_address'] = $json_decode['payment']['shipping_address'];
+        $payment['shipping_city'] = $json_decode['payment']['shipping_city'];
+        $payment['shipping_state'] = $json_decode['payment']['shipping_state'];
+        $payment['shipping_zip'] = $json_decode['payment']['shipping_zip'];
+        $payment['shipping_country'] = $json_decode['payment']['shipping_country'];
+        $payment['quantity'] = $json_decode['payment']['quantity'];
+        $payment['unit_price'] = $json_decode['payment']['unit_price'];
+        $payment['fees'] = $json_decode['payment']['fees'];
+        $payment['affiliate_commission'] = $json_decode['payment']['affiliate_commission'];
+        $payment['payment_request'] = $json_decode['payment']['payment_request'];
+        $payment['instrument_type'] = $json_decode['payment']['instrument_type'];
+        $payment['failure'] = $json_decode['payment']['failure'];
+        $payment['created_at'] = $json_decode['payment']['created_at'];
+        if($this->Order_model->check_exists('payment','payment_id',$payment['payment_id'])) {
+            $this->Order_model->insertRow('payment',$payment);
+        } else {
+            $this->Order_model->updateRow('payment','payment_id',$payment['payment_id'],$payment);
         }
     }
 

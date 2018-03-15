@@ -135,3 +135,5 @@ ALTER TABLE `users` CHANGE `user_id` `user_id` BIGINT(121) NOT NULL AUTO_INCREME
 ALTER TABLE `user_shipping_address` CHANGE `id` `id` BIGINT(121) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `user_shipping_address` CHANGE `user_id` `user_id` BIGINT(121) NOT NULL;
 ALTER TABLE `support_ticke_message` CHANGE `ticket_id` `ticket_id` BIGINT(121) NOT NULL;
+
+INSERT INTO `setting`(`id`,`keys`,`value`) VALUES ( NULL,'logs_path','/var/www/html/msm/logs');
