@@ -444,6 +444,7 @@ class Order extends CI_Controller {
             $json_decode = json_decode($response, true);
             if ($json_decode['success']) {
                 $this->savePaymentDataToDB($content->orderId,$json_decode);
+                writeOrderLog($content->orderId, $json_decode['payment']['payment_id'], $response);
                 echo json_encode(array('status' => 'true', 'message' => 'Payment Details Saved', 'Data' => $json_decode));
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Cannot get Payment Details'));

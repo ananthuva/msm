@@ -440,21 +440,21 @@
         if(!empty($result)){
             $logs_path = $result[0]['value'];
         }
-        $$this->ci->mcc_model->getRow('sys_configuration', 'var_value', array('var_name' => 'logs_path'))->var_value;
-
-        if (!file_exists($logs_path.'order/' . $order_id)) {
-            mkdir($logs_path.'order/' . $order_id, 0777, true);
-            $logFile = fopen($logs_path.'order/' . $order_id . '.php', "a");
-            fwrite($logFile, "==============================================" . date('d-m-Y') . "===" . $payment_id . "============================" . "\n\n");
-            fwrite($logFile, var_export($errorlog, true));
-            fwrite($logFile, "\n\n" . "=============================================END OF LOG===============================================" . "\n\n\n\n\n\n");
-            fclose($logFile);
-        } else {
-            $logFile = fopen($logs_path.'order/' . $order_id . '.php', "a");
-            fwrite($logFile, "==============================================" . date('d-m-Y') . "===" . $payment_id . "============================" . "\n\n");
-            fwrite($logFile, var_export($errorlog, true));
-            fwrite($logFile, "\n\n" . "=============================================END OF LOg===============================================" . "\n\n\n\n\n\n");
-            fclose($logFile);
+        if(!empty($logs_path)) {
+            if (!file_exists($logs_path.'order/')) {
+                mkdir($logs_path.'order/', 0777, true);
+                $logFile = fopen($logs_path.'order/' . $order_id . '.php', "a");
+                fwrite($logFile, "=================================" . date('d-m-Y H:i:s') . "===" . $payment_id . "============================" . "\n\n");
+                fwrite($logFile, var_export($errorlog, true));
+                fwrite($logFile, "\n\n" . "=============================================END OF LOG===============================================" . "\n\n\n\n\n\n");
+                fclose($logFile);
+            } else {
+                $logFile = fopen($logs_path.'order/' . $order_id . '.php', "a");
+                fwrite($logFile, "==================================" . date('d-m-Y H:i:s') . "===" . $payment_id . "============================" . "\n\n");
+                fwrite($logFile, var_export($errorlog, true));
+                fwrite($logFile, "\n\n" . "=============================================END OF LOg===============================================" . "\n\n\n\n\n\n");
+                fclose($logFile);
+            }
         }
     }
 ?>

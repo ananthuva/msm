@@ -101,15 +101,17 @@
                                 <input required type="text" name="poc" value="<?php echo isset($storeData->poc) ? $storeData->poc : ''; ?>" class="form-control" placeholder="Percent of Commission">
                             </div>
                         </div>
-                        <div class="col-md-6 hidden">
+                        <div class="col-md-6">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
+                                        <label for="">Latitude</label>
                                         <input id="latitude" name="latitude" type="text" value="<?php echo isset($storeData->latitude) ? $storeData->latitude : ''; ?>" class="form-control" placeholder="Latitude">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
+                                        <label for="">Longitude</label>
                                         <input id="longitude" name="longitude" type="text" value="<?php echo isset($storeData->longitude) ? $storeData->longitude : ''; ?>" class="form-control" placeholder="Longitude">
                                     </div>
                                 </div>
