@@ -60,6 +60,8 @@ class Store extends CI_Controller {
                     break;
                 case 'create_stores' : $this->ws_createStores();
                     break;
+                case 'get_locations' : $this->ws_getLocations();
+                    break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
         } else {
@@ -150,6 +152,38 @@ class Store extends CI_Controller {
         }
         exit;
     }
+    
+    /**
+     * This function is used for getting locations
+     * @return String
+     */
+    public function ws_getLocations() {
+        $content = json_decode(file_get_contents("php://input"));
+        if (!empty($content->type)) {
+            $data = '';
+            switch ($content->type) {
+                case 'countries' : 
+                    $data = $this->Store_model->getAlldata('country');
+                    break;
+                case 'states' :
+                    $data = $this->Store_model->getAlldata('state');
+                    break;
+                case 'districts':
+                    $data = $this->Store_model->getAlldata('district');
+                    break;
+                case 'cities':
+                    $data = $this->Store_model->getAlldata('city');
+                    break;
+                default:
+                    break;
+            }
+            echo str_replace(':null', ':""', json_encode(array('status' => 'true','message' => 'Store creation successful', 'Data' => $data)));
+        } else {
+            echo json_encode(array('status' => 'false', 'message' => 'Invalid type'));
+        }
+        exit;
+    }
+    
 
     /**
      * This function is used for add a shop

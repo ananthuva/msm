@@ -128,5 +128,12 @@ class Store_model extends SYS_Model {
         $query = $this->db->get();
         return $query->result();
     }
+    
+    public function getAlldata($tableName) {
+        $this->db->select('*');
+        $this->db->from($tableName);
+        $query = $this->db->get();
+        return $query->result();
+    }
 
 }
