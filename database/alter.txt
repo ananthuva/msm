@@ -137,3 +137,9 @@ ALTER TABLE `user_shipping_address` CHANGE `user_id` `user_id` BIGINT(121) NOT N
 ALTER TABLE `support_ticke_message` CHANGE `ticket_id` `ticket_id` BIGINT(121) NOT NULL;
 
 INSERT INTO `setting`(`id`,`keys`,`value`) VALUES ( NULL,'logs_path','/var/www/html/msm/logs');
+
+/*************************************/
+
+ALTER TABLE `billing_address`     CHANGE `state_id` `state` VARCHAR(200) NOT NULL;
+ALTER TABLE `delivery_address`     CHANGE `state_id` `state` VARCHAR(200) NOT NULL;
+ALTER TABLE `user_shipping_address`     CHANGE `state_id` `state` VARCHAR(200) NULL ;

@@ -98,7 +98,7 @@ class Order extends CI_Controller {
             [ 'field' => 'delivery_street', 'label' => 'Street in Delivery Address', 'rules' => 'required',],
             //[ 'field' => 'delivery_post', 'label' => 'Postoffice in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_pin', 'label' => 'PIN in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'delivery_state_id', 'label' => 'State Id in Delivery Address', 'rules' => 'required',],
+            [ 'field' => 'delivery_state', 'label' => 'State in Delivery Address', 'rules' => 'required',],
             //[ 'field' => 'latitude', 'label' => 'latitude', 'rules' => 'required',],
             //[ 'field' => 'longitude', 'label' => 'longitude', 'rules' => 'required',],
             [ 'field' => 'billing_full_name', 'label' => 'Name in Billing Address', 'rules' => 'required',],
@@ -107,7 +107,7 @@ class Order extends CI_Controller {
             [ 'field' => 'billing_street', 'label' => 'Street in Billing Address', 'rules' => 'required',],
             //[ 'field' => 'billing_post', 'label' => 'Postoffice in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_pin', 'label' => 'PIN in Billing Address', 'rules' => 'required',],
-            [ 'field' => 'billing_state_id', 'label' => 'State Id in Billing Address', 'rules' => 'required',],
+            [ 'field' => 'billing_state', 'label' => 'State in Billing Address', 'rules' => 'required',],
                 //[ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
         );
         $this->form_validation->set_rules($rules);
@@ -140,7 +140,7 @@ class Order extends CI_Controller {
                 $delivery['street'] = $content->delivery_street;
                 $delivery['postoffice'] = (isset($content->delivery_post)) ? $content->delivery_post : '';
                 $delivery['pin'] = $content->delivery_pin;
-                $delivery['state_id'] = $content->delivery_state_id;
+                $delivery['state'] = $content->delivery_state;
                 $delivery['latitude'] = (isset($content->latitude)) ? $content->latitude : '';
                 $delivery['longitude'] = (isset($content->longitude)) ? $content->longitude : '';
                 $this->Order_model->insertRow('delivery_address', $delivery);
@@ -151,7 +151,7 @@ class Order extends CI_Controller {
                 $billing['street'] = $content->billing_street;
                 $billing['postoffice'] = (isset($content->billing_post)) ? $content->billing_post : '';
                 $billing['pin'] = $content->billing_pin;
-                $billing['state_id'] = $content->billing_state_id;
+                $billing['state'] = $content->billing_state;
                 $this->Order_model->insertRow('billing_address', $billing);
                 if (isset($_POST['attachment'])) {
                     foreach ($_POST['attachment'] as $attach) {
@@ -263,7 +263,7 @@ class Order extends CI_Controller {
             [ 'field' => 'house_name', 'label' => 'House Name', 'rules' => 'required'],
             [ 'field' => 'street', 'label' => 'Street', 'rules' => 'required'],
             [ 'field' => 'pin', 'label' => 'PIN', 'rules' => 'required'],
-            [ 'field' => 'state_id', 'label' => 'State Id', 'rules' => 'required']
+            [ 'field' => 'state', 'label' => 'State', 'rules' => 'required']
         );
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {
@@ -278,7 +278,7 @@ class Order extends CI_Controller {
             $shipping['street'] = $content->street;
             $shipping['postoffice'] = (isset($content->post)) ? $content->post : '';
             $shipping['pin'] = $content->pin;
-            $shipping['state_id'] = $content->state_id;
+            $shipping['state'] = $content->state;
             $data = $this->Order_model->getShippingAddress($content->user_id);
             if (empty($data)) {
                 $id = $this->Order_model->create('user_shipping_address', $shipping);

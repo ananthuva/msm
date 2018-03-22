@@ -101,10 +101,10 @@ class Order_model extends SYS_Model {
      */
     public function getOrderBillingAddress($id) {
         $this->db->select('b.order_id,b.full_name,b.mobile,b.house_name,b.street,b.postoffice,b.pin,'
-                . 's.name as state_name,b.country');
+                . 'b.state as state_name,b.country');
         $this->db->where('b.order_id', $id);
         $this->db->from('billing_address b');
-        $this->db->join('state s', 's.id = b.state_id', 'left');
+//        $this->db->join('state s', 's.id = b.state_id', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -114,10 +114,10 @@ class Order_model extends SYS_Model {
      */
     public function getOrderDeliveryAddress($id) {
         $this->db->select('d.order_id,d.full_name,d.mobile,d.house_name,d.street,d.postoffice,d.pin,'
-                . 's.name as state_name,d.country,d.latitude,d.longitude');
+                . 'd.state as state_name,d.country,d.latitude,d.longitude');
         $this->db->where('d.order_id', $id);
         $this->db->from('delivery_address d');
-        $this->db->join('state s', 's.id = d.state_id', 'left');
+//        $this->db->join('state s', 's.id = d.state_id', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
@@ -150,10 +150,10 @@ class Order_model extends SYS_Model {
      */
     public function getShippingAddress($id) {
         $this->db->select('d.full_name,d.mobile,d.house_name,d.street,d.postoffice,d.pin,'
-                . 's.name as state_name');
+                . 'd.state as state_name');
         $this->db->where('d.user_id', $id);
         $this->db->from('user_shipping_address d');
-        $this->db->join('state s', 's.id = d.state_id', 'left');
+//        $this->db->join('state s', 's.id = d.state_id', 'left');
         $query = $this->db->get();
         return $query->row_array();
     }
