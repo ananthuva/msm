@@ -143,3 +143,5 @@ INSERT INTO `setting`(`id`,`keys`,`value`) VALUES ( NULL,'logs_path','/var/www/h
 ALTER TABLE `billing_address`     CHANGE `state_id` `state` VARCHAR(200) NOT NULL;
 ALTER TABLE `delivery_address`     CHANGE `state_id` `state` VARCHAR(200) NOT NULL;
 ALTER TABLE `user_shipping_address`     CHANGE `state_id` `state` VARCHAR(200) NULL ;
+
+ALTER TABLE `billing_address`     CHANGE `full_name` `full_name` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,     CHANGE `house_name` `house_name` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,     CHANGE `street` `street` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL ,     CHANGE `pin` `pin` INT(10) NULL ,     CHANGE `state` `state` VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL ;

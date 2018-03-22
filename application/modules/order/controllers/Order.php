@@ -108,7 +108,7 @@ class Order extends CI_Controller {
             //[ 'field' => 'billing_post', 'label' => 'Postoffice in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_pin', 'label' => 'PIN in Billing Address', 'rules' => 'required',],
             [ 'field' => 'billing_state', 'label' => 'State in Billing Address', 'rules' => 'required',],
-                //[ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
+            [ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
         );
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {
@@ -145,13 +145,13 @@ class Order extends CI_Controller {
                 $delivery['longitude'] = (isset($content->longitude)) ? $content->longitude : '';
                 $this->Order_model->insertRow('delivery_address', $delivery);
                 $billing['order_id'] = $order_id;
-                $billing['full_name'] = $content->billing_full_name;
+                $billing['full_name'] = (isset($content->billing_full_name)) ? $content->billing_full_name : '';
                 $billing['mobile'] = (isset($content->billing_mobile)) ? $content->billing_mobile : '';
-                $billing['house_name'] = $content->billing_house_name;
-                $billing['street'] = $content->billing_street;
+                $billing['house_name'] = (isset($content->billing_house_name)) ? $content->billing_house_name : '';
+                $billing['street'] = (isset($content->billing_street)) ? $content->billing_street : '';
                 $billing['postoffice'] = (isset($content->billing_post)) ? $content->billing_post : '';
-                $billing['pin'] = $content->billing_pin;
-                $billing['state'] = $content->billing_state;
+                $billing['pin'] = (isset($content->billing_pin)) ? $content->billing_pin : '';
+                $billing['state'] = (isset($content->billing_state)) ? $content->billing_state : '';
                 $this->Order_model->insertRow('billing_address', $billing);
                 if (isset($_POST['attachment'])) {
                     foreach ($_POST['attachment'] as $attach) {
