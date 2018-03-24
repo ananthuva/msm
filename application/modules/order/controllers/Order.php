@@ -431,6 +431,13 @@ class Order extends CI_Controller {
             $errors = ltrim(explode('.', $errors)[0]);
             echo json_encode(array('status' => 'false', 'message' => $errors));
         } else {
+            if( strpos( $content->paymentId, 'paymentId=' ) !== false ) {
+                $str = explode('paymentId=', $string);
+                if(!empty($str[1])) {
+                    $str = explode(":", $str[1]);
+                    $content->paymentId = $str[0];
+                }
+            } 
             $url = 'https://test.instamojo.com/api/1.1/payments/'. $content->paymentId;
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
