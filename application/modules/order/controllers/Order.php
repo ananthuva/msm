@@ -72,7 +72,9 @@ class Order extends CI_Controller {
                     break;
                 case 'save_payment_details' : $this->ws_savePaymentDetails();
                     break;
-                case 'set_quote' : $this->ws_set_quote();
+                case 'set_quote' : $this->ws_setQuote();
+                    break;
+                case 'change_status' : $this->ws_changeStatus();
                     break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
@@ -541,7 +543,7 @@ class Order extends CI_Controller {
      * This function is used for saving order quote from stores
      * @return String
      */
-    public function ws_set_quote() {
+    public function ws_setQuote() {
         $content = json_decode(file_get_contents("php://input"));
         $_POST = (array) $content;
         $rules = array(
@@ -573,6 +575,59 @@ class Order extends CI_Controller {
                         $this->sendNotification('', 'Order status updated', 'Order - '.$data['order_bill_id'], $data['user_id']);
                         echo json_encode(array('status' => 'true', 'message' => 'Order Confirmed Successfully'));
                     }
+                }
+            } else {
+                echo json_encode(array('status' => 'false', 'message' => 'Invalid Order ID'));
+            }
+        }
+        exit;
+    }
+    
+    /**
+     * This function is used for changing order status
+     * @return String
+     */
+    public function ws_changeStatus() {
+        $content = json_decode(file_get_contents("php://input"));
+        $_POST = (array) $content;
+        $rules = array(
+            [ 'field' => 'user_id', 'label' => 'User ID', 'rules' => 'required'],
+            [ 'field' => 'order_id', 'label' => 'Order ID', 'rules' => 'required'],
+            [ 'field' => 'status_id', 'label' => 'Status ID', 'rules' => 'required'],
+            //[ 'field' => 'store_id', 'label' => 'Store ID', 'rules' => 'required']
+        );
+        $this->form_validation->set_rules($rules);
+        if (!$this->form_validation->run()) {
+            $errors = preg_replace("/\r|\n/", "", validation_errors(" ", " "));
+            $errors = ltrim(explode('.', $errors)[0]);
+            echo json_encode(array('status' => 'false', 'message' => $errors));
+        } else {
+            $order_data = $this->Order_model->getOrderdetails($content->order_id);
+            if (!empty($order_data)) {
+                if($content->store_id) {
+                    $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
+                    if (empty($store)) {
+                        echo json_encode(array('status' => 'false', 'message' => 'Invalid Store Id'));
+                        exit;
+                    }
+                }
+                $user = $this->Order_model->get_data_by('users', $content->user_id, 'user_id');
+                $status = $this->Order_model->get_data_by('table_order_status', $content->status_id, 'order_status_id');
+                if (empty($user) || empty($status)) {
+                    echo json_encode(array('status' => 'false', 'message' => 'Invalid User or Status'));
+                } else {
+                    $data = array('status' => $content->status_id, 'last_modified_by' => $content->user_id);
+                    if($content->store_id) {
+                        $data['store_id'] = $content->store_id;
+                    }
+                    $this->Order_model->updateRow('order', 'id', $content->order_id, $data);
+                    $data = array('order_id' => $content->order_id, 'order_status' => $content->status_id, 'created_by' => $content->user_id);
+                    if($content->store_id) {
+                        $data['store_id'] = $content->store_id;
+                    }
+                    $this->Order_model->insertRow('order_history', $data);
+                    $this->sendNotification('', 'Order status updated', 'Order - '.$order_data['order_bill_id'], $order_data['user_id']);
+                    echo json_encode(array('status' => 'true', 'message' => 'Order Status Changed'));
                 }
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Invalid Order ID'));
