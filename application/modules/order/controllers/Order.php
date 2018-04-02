@@ -58,11 +58,11 @@ class Order extends CI_Controller {
     public function process_ws_api() {
         if ($this->input->get('mod') && !empty($this->input->get('mod'))) {
             switch ($this->input->get('mod')) {
-                case 'order_medicine' : $this->ws_oderMedicine();
+                case 'order_medicine' : $this->ws_orderMedicine();
                     break;
-                case 'order_list' : $this->ws_oderList();
+                case 'order_list' : $this->ws_orderList();
                     break;
-                case 'order_details' : $this->ws_oderDetails();
+                case 'order_details' : $this->ws_orderDetails();
                     break;
                 case 'get_shipping_address' : $this->ws_getShippingAddress();
                     break;
@@ -88,7 +88,7 @@ class Order extends CI_Controller {
      * This function is used for ordering Medicine
      * @return String
      */
-    public function ws_oderMedicine() {
+    public function ws_orderMedicine() {
 
         $content = json_decode(file_get_contents("php://input"));
         $_POST = (array) $content;
@@ -177,11 +177,12 @@ class Order extends CI_Controller {
      * This function is used for getting list of orders
      * @return String
      */
-    public function ws_oderList() {
+    public function ws_orderList() {
         $content = json_decode(file_get_contents("php://input"));
         $limit = property_exists($content, 'limit') ? $content->limit : '';
         $offset = property_exists($content, 'offset') ? $content->offset : '';
-        $orders = $this->Order_model->getOrderList($limit, $offset);
+        $store_id = property_exists($content, 'store_id') ? $content->store_id : '';
+        $orders = $this->Order_model->getOrderList($limit, $offset, $store_id);
         echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $orders)));
         exit;
     }
@@ -211,7 +212,7 @@ class Order extends CI_Controller {
      * This function is used for getting an order details
      * @return String
      */
-    public function ws_oderDetails() {
+    public function ws_orderDetails() {
         $content = json_decode(file_get_contents("php://input"));
         $id = property_exists($content, 'order_id') ? $content->order_id : '';
         if (empty($id)) {
@@ -773,3 +774,4 @@ class Order extends CI_Controller {
     }
 
 }
+
