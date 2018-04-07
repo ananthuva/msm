@@ -126,11 +126,11 @@ class Store extends CI_Controller {
             echo json_encode(array('status' => 'false', 'message' => 'Invalid longitude'));
         } else {
 
-//            $checkValue = $this->User_model->check_exists('users', 'email', $content->email);
-//            if ($checkValue == false) {
-//                echo json_encode(array('status' => 'false','message' => 'Email Already Registered'));
-//                exit;
-//            }
+            $checkValue = $this->Store_model->check_exists('stores', 'user_id', $content->user_id);
+            if ($checkValue == false) {
+                echo json_encode(array('status' => 'false','message' => 'User Already Taken'));
+                exit;
+            }
             $data['is_active'] = 1;
             $data['name'] = $content->name;
             $data['address'] = $content->address;

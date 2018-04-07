@@ -557,7 +557,6 @@ class Order extends CI_Controller {
         $rules = array(
             [ 'field' => 'user_id', 'label' => 'User id', 'rules' => 'required'],
             [ 'field' => 'order_id', 'label' => 'Order ID', 'rules' => 'required'],
-            [ 'field' => 'store_id', 'label' => 'Store ID', 'rules' => 'required'],
             [ 'field' => 'amount', 'label' => 'Amount', 'rules' => 'required']
         );
         $this->form_validation->set_rules($rules);
@@ -571,7 +570,7 @@ class Order extends CI_Controller {
                 if ($data['order_status_name'] != 'Send Prescription') {
                     echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
                 } else {
-                    $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
+                    $store = $this->Order_model->get_data_by('stores', $content->user_id, 'user_id');
                     $user = $this->Order_model->get_data_by('users', $content->user_id, 'user_id');
                     if (empty($store) || empty($user)) {
                         echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
