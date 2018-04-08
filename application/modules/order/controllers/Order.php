@@ -547,7 +547,7 @@ class Order extends CI_Controller {
         echo $response;
     }
 
-    /**
+     /**
      * This function is used for saving order quote from stores
      * @return String
      */
@@ -567,9 +567,8 @@ class Order extends CI_Controller {
         } else {
             $data = $this->Order_model->getOrderdetails($content->order_id);
             if (!empty($data)) {
-                if ($data['order_status_name'] != 'Send Prescription' || 'Get Quote') {
-                    echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
-                } else {
+                if ($data['order_status_name'] == 'Send Prescription' || $data['order_status_name'] == 'Get Quote') {
+                
                     $store = $this->Order_model->get_data_by('stores', $content->user_id, 'user_id');
                     $user = $this->Order_model->get_data_by('users', $content->user_id, 'user_id');
                     if (empty($store) || empty($user)) {
@@ -577,11 +576,14 @@ class Order extends CI_Controller {
                     } else {
                         $result = $this->Order_model->get_data_by('table_order_status', 'Confirmed Order', 'order_status_name');
                         $order_status = (!empty($result)) ? $result[0]->order_status_id : 3;
-                        $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $content->store_id, 'last_modified_by' => $content->user_id));
-                        $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $content->store_id, 'created_by' => $content->user_id));
+                        $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $store[0]->id, 'last_modified_by' => $content->user_id));
+                        $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $store[0]->id, 'created_by' => $content->user_id));
                         $this->sendNotification('', 'Order status updated', 'Order - '.$data['order_bill_id'], $data['user_id']);
                         echo json_encode(array('status' => 'true', 'message' => 'Order Confirmed Successfully'));
                     }
+                    
+                } else {
+                    echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
                 }
             } else {
                 echo json_encode(array('status' => 'false', 'message' => 'Invalid Order ID'));
