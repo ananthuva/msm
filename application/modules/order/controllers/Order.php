@@ -101,8 +101,8 @@ class Order extends CI_Controller {
             //[ 'field' => 'delivery_post', 'label' => 'Postoffice in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_pin', 'label' => 'PIN in Delivery Address', 'rules' => 'required',],
             [ 'field' => 'delivery_state', 'label' => 'State in Delivery Address', 'rules' => 'required',],
-            //[ 'field' => 'latitude', 'label' => 'latitude', 'rules' => 'required',],
-            //[ 'field' => 'longitude', 'label' => 'longitude', 'rules' => 'required',],
+            [ 'field' => 'latitude', 'label' => 'latitude', 'rules' => 'required',],
+            [ 'field' => 'longitude', 'label' => 'longitude', 'rules' => 'required',],
             //[ 'field' => 'billing_full_name', 'label' => 'Name in Billing Address', 'rules' => 'required',],
             //[ 'field' => 'billing_mobile', 'label' => 'Mobile in Billing Address', 'rules' => 'required',],
             //[ 'field' => 'billing_house_name', 'label' => 'House Name in Billing Address', 'rules' => 'required',],
@@ -567,7 +567,7 @@ class Order extends CI_Controller {
         } else {
             $data = $this->Order_model->getOrderdetails($content->order_id);
             if (!empty($data)) {
-                if ($data['order_status_name'] != 'Send Prescription') {
+                if ($data['order_status_name'] != 'Send Prescription' || 'Get Quote') {
                     echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
                 } else {
                     $store = $this->Order_model->get_data_by('stores', $content->user_id, 'user_id');
@@ -575,8 +575,8 @@ class Order extends CI_Controller {
                     if (empty($store) || empty($user)) {
                         echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
                     } else {
-                        $result = $this->Order_model->get_data_by('table_order_status', 'Get Quote', 'order_status_name');
-                        $order_status = (!empty($result)) ? $result[0]->order_status_id : 2;
+                        $result = $this->Order_model->get_data_by('table_order_status', 'Confirmed Order', 'order_status_name');
+                        $order_status = (!empty($result)) ? $result[0]->order_status_id : 3;
                         $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $content->store_id, 'last_modified_by' => $content->user_id));
                         $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $content->store_id, 'created_by' => $content->user_id));
                         $this->sendNotification('', 'Order status updated', 'Order - '.$data['order_bill_id'], $data['user_id']);
