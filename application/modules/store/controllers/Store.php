@@ -252,7 +252,7 @@ class Store extends CI_Controller {
         if ($this->input->post('id')) {
             $id = $this->input->post('id');
         }
-        $redirect = 'editStores';
+        $redirect = 'editStores/'.$id;
         $is_unique = '';
         if (empty($id)) {
             $redirect = 'createStores';
