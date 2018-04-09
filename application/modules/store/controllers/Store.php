@@ -253,12 +253,14 @@ class Store extends CI_Controller {
             $id = $this->input->post('id');
         }
         $redirect = 'editStores';
+        $is_unique = '';
         if (empty($id)) {
             $redirect = 'createStores';
+            $is_unique =  '|is_unique[stores.user_id]';
         }
         
         $this->form_validation->set_rules('address', 'Address', 'trim|required');
-        $this->form_validation->set_rules('user_id', 'Owner', 'trim|required');
+        $this->form_validation->set_rules('user_id', 'Owner', 'trim|required'.$is_unique);
         $this->form_validation->set_rules('license_no', 'License Number', 'trim|required');
         $this->form_validation->set_rules('name', 'Name', 'trim|required');
         $this->form_validation->set_rules('is_active', 'Status', 'trim|required');
@@ -267,7 +269,18 @@ class Store extends CI_Controller {
         $this->form_validation->set_rules('poc', 'Percent of Commission', 'trim|required|callback_numeric_val');
 
         if ($this->form_validation->run() === TRUE) {
-            
+            if ($id != '') {
+                $store = $this->Store_model->get_data_by('stores', $data['user_id'], 'user_id');
+                if(count($store) >= 2) {
+                    $this->session->set_flashdata('messagePr', 'Owner cannot have more than one stores');
+                    redirect(base_url() . 'store/' . $redirect, 'refresh');
+                } elseif(count($store) == 1){
+                    if($store[0]->id != $id) {
+                        $this->session->set_flashdata('messagePr', 'Owner alrady assigned to another store');
+                        redirect(base_url() . 'store/' . $redirect, 'refresh');
+                    }
+                }
+            }
             $agreement = $_FILES['agreement'];
             if(!empty($agreement)) {
                 $agreement = $this->rearrange($agreement);
