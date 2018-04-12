@@ -94,24 +94,25 @@ class Order extends CI_Controller {
         $content = json_decode(file_get_contents("php://input"));
         $_POST = (array) $content;
         $rules = array(
-            [ 'field' => 'user_id', 'label' => 'user id', 'rules' => 'required',],
-            [ 'field' => 'delivery_full_name', 'label' => 'Name in Delivery Address', 'rules' => 'required',],
+            [ 'field' => 'user_id', 'label' => 'user id', 'rules' => 'required'],
+            [ 'field' => 'delivery_full_name', 'label' => 'Name in Delivery Address', 'rules' => 'required'],
             [ 'field' => 'delivery_mobile', 'label' => 'mobile in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'delivery_house_name', 'label' => 'House Name in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'delivery_street', 'label' => 'Street in Delivery Address', 'rules' => 'required',],
-            //[ 'field' => 'delivery_post', 'label' => 'Postoffice in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'delivery_pin', 'label' => 'PIN in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'delivery_state', 'label' => 'State in Delivery Address', 'rules' => 'required',],
-            [ 'field' => 'latitude', 'label' => 'latitude', 'rules' => 'required',],
-            [ 'field' => 'longitude', 'label' => 'longitude', 'rules' => 'required',],
-            //[ 'field' => 'billing_full_name', 'label' => 'Name in Billing Address', 'rules' => 'required',],
-            //[ 'field' => 'billing_mobile', 'label' => 'Mobile in Billing Address', 'rules' => 'required',],
-            //[ 'field' => 'billing_house_name', 'label' => 'House Name in Billing Address', 'rules' => 'required',],
-            //[ 'field' => 'billing_street', 'label' => 'Street in Billing Address', 'rules' => 'required',],
-            //[ 'field' => 'billing_post', 'label' => 'Postoffice in Billing Address', 'rules' => 'required',],
-            //[ 'field' => 'billing_pin', 'label' => 'PIN in Billing Address', 'rules' => 'required',],
-            //[ 'field' => 'billing_state', 'label' => 'State in Billing Address', 'rules' => 'required',],
-            [ 'field' => 'note', 'label' => 'note', 'rules' => 'required',],
+            [ 'field' => 'delivery_house_name', 'label' => 'House Name in Delivery Address', 'rules' => 'required'],
+            [ 'field' => 'delivery_street', 'label' => 'Street in Delivery Address', 'rules' => 'required'],
+            [ 'field' => 'delivery_city', 'label' => 'City in Delivery Address', 'rules' => 'required'],
+            //[ 'field' => 'delivery_post', 'label' => 'Postoffice in Delivery Address', 'rules' => 'required'],
+            [ 'field' => 'delivery_pin', 'label' => 'PIN in Delivery Address', 'rules' => 'required'],
+            [ 'field' => 'delivery_state', 'label' => 'State in Delivery Address', 'rules' => 'required'],
+            [ 'field' => 'latitude', 'label' => 'latitude', 'rules' => 'required'],
+            [ 'field' => 'longitude', 'label' => 'longitude', 'rules' => 'required'],
+            //[ 'field' => 'billing_full_name', 'label' => 'Name in Billing Address', 'rules' => 'required'],
+            //[ 'field' => 'billing_mobile', 'label' => 'Mobile in Billing Address', 'rules' => 'required'],
+            //[ 'field' => 'billing_house_name', 'label' => 'House Name in Billing Address', 'rules' => 'required'],
+            //[ 'field' => 'billing_street', 'label' => 'Street in Billing Address', 'rules' => 'required'],
+            //[ 'field' => 'billing_post', 'label' => 'Postoffice in Billing Address', 'rules' => 'required'],
+            //[ 'field' => 'billing_pin', 'label' => 'PIN in Billing Address', 'rules' => 'required'],
+            //[ 'field' => 'billing_state', 'label' => 'State in Billing Address', 'rules' => 'required'],
+            [ 'field' => 'note', 'label' => 'note', 'rules' => 'required'],
         );
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {
@@ -141,6 +142,7 @@ class Order extends CI_Controller {
                 $delivery['full_name'] = $content->delivery_full_name;
                 $delivery['mobile'] = $content->delivery_mobile;
                 $delivery['house_name'] = $content->delivery_house_name;
+                $delivery['city'] = $content->delivery_city;
                 $delivery['street'] = $content->delivery_street;
                 $delivery['postoffice'] = (isset($content->delivery_post)) ? $content->delivery_post : '';
                 $delivery['pin'] = $content->delivery_pin;
@@ -304,6 +306,7 @@ class Order extends CI_Controller {
             $shipping['street'] = $content->street;
             $shipping['postoffice'] = (isset($content->post)) ? $content->post : '';
             $shipping['pin'] = $content->pin;
+            $shipping['city'] = ($content->city) ? $content->city: '';
             $shipping['state'] = $content->state;
             $data = $this->Order_model->getShippingAddress($content->user_id);
             if (empty($data)) {
