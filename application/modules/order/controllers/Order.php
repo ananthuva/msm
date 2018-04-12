@@ -7,7 +7,7 @@ class Order extends CI_Controller {
     function __construct() {
         parent::__construct();
         $this->load->model('Order_model');
-        $this->load->model('store/Store_model','store_model');
+        $this->load->model('store/Store_model', 'store_model');
         $this->load->helper('download');
         $this->user_id = isset($this->session->get_userdata()['user_details'][0]->id) ? $this->session->get_userdata()['user_details'][0]->user_id : '1';
     }
@@ -76,6 +76,8 @@ class Order extends CI_Controller {
                 case 'set_quote' : $this->ws_setQuote();
                     break;
                 case 'change_status' : $this->ws_changeStatus();
+                    break;
+                case 'new_orders' : $this->ws_newOrders();
                     break;
                 default: echo json_encode(array('status' => 'false', 'message' => 'Request syntax error'));
             }
@@ -169,27 +171,27 @@ class Order extends CI_Controller {
                         }
                     }
                 }
-                
+
                 $stores = $this->store_model->getNearbyStores();
-                if(empty($stores)) { //send notification to all stores
-                    $this->sendNotification('pharmacist', 'There is a new order request.', 'Order '. $order['order_bill_id']);
-                } else if(count($stores) == 1) { //send notification to assigned store
+                if (empty($stores)) { //send notification to all stores
+                    $this->sendNotification('pharmacist', 'There is a new order request.', 'Order ' . $order['order_bill_id']);
+                } else if (count($stores) == 1) { //send notification to assigned store
                     $update = array('store_id' => $stores[0]['id'], 'status' => 2);
                     $where = array('id' => $order_id);
                     $this->Order_model->updateTableRow('order', $update, $where);
                     $this->Order_model->insertRow('order_history', array('order_id' => $order_id, 'order_status' => 2, 'store_id' => $stores[0]['id'], 'created_by' => $order['user_id']));
-                    if(!empty($stores[0]['user_id'])) {
-                        $this->sendNotification('', 'There is a new order request.', 'Order '. $order['order_bill_id'], $stores[0]['user_id']);
-                    }   
+                    if (!empty($stores[0]['user_id'])) {
+                        $this->sendNotification('', 'There is a new order request.', 'Order ' . $order['order_bill_id'], $stores[0]['user_id']);
+                    }
                 } else {
                     $update = array('status' => 2);
                     $where = array('id' => $order_id);
                     $this->Order_model->updateTableRow('order', $update, $where);
                     $this->Order_model->insertRow('order_history', array('order_id' => $order_id, 'order_status' => 2, 'store_id' => '', 'created_by' => $order['user_id']));
-                    foreach($stores as $store) {
-                         $this->Order_model->insertRow('order_store_mapping', array('order_id' => $order_id, 'store_id' => $store['id']));
-                        if(!empty($store['user_id'])) {
-                            $this->sendNotification('', 'There is a new order request.', 'Order '. $order['order_bill_id'], $store['user_id']);
+                    foreach ($stores as $store) {
+                        $this->Order_model->insertRow('order_store_mapping', array('order_id' => $order_id, 'store_id' => $store['id']));
+                        if (!empty($store['user_id'])) {
+                            $this->sendNotification('', 'There is a new order request.', 'Order ' . $order['order_bill_id'], $store['user_id']);
                         }
                     }
                 }
@@ -214,22 +216,40 @@ class Order extends CI_Controller {
     }
 
     /**
+     * This function is used for getting list ofnew orders of a store
+     * @return String
+     */
+    public function ws_newOrders() {
+        $content = json_decode(file_get_contents("php://input"));
+        $limit = property_exists($content, 'limit') ? $content->limit : '';
+        $offset = property_exists($content, 'offset') ? $content->offset : '';
+        $store_id = property_exists($content, 'store_id') ? $content->store_id : '';
+        if (empty($store_id)) {
+            echo json_encode(array('status' => 'false', 'message' => 'Store ID is required'));
+        } else {
+            $orders = $this->Order_model->getNewOrderList($store_id);
+            echo str_replace(':null', ':""', json_encode(array('status' => 'true', 'message' => 'Request successful', 'Data' => $orders)));
+        }
+        exit;
+    }
+
+    /**
      * This function is used for sending fcm notification
      * @return String
      */
     public function sendNotification($user_type = NULL, $body, $title, $user_id = NULL) {
-        if($user_type != '') {
+        if ($user_type != '') {
             $users = $this->Order_model->get_data_by('users', $user_type, 'user_type');
         } else {
             $users = $this->Order_model->get_data_by('users', $user_id, 'user_id');
         }
         $registrationIDs = [];
-        foreach($users as $user){
-            if($user->firebase_reg_id != ''){
+        foreach ($users as $user) {
+            if ($user->firebase_reg_id != '') {
                 $registrationIDs[] = $user->firebase_reg_id;
             }
         }
-        if(!empty($registrationIDs)) {
+        if (!empty($registrationIDs)) {
             push_notification($registrationIDs, $body, $title);
         }
     }
@@ -307,7 +327,7 @@ class Order extends CI_Controller {
             $shipping['street'] = $content->street;
             $shipping['postoffice'] = (isset($content->post)) ? $content->post : '';
             $shipping['pin'] = $content->pin;
-            $shipping['city'] = ($content->city) ? $content->city: '';
+            $shipping['city'] = ($content->city) ? $content->city : '';
             $shipping['state'] = $content->state;
             $data = $this->Order_model->getShippingAddress($content->user_id);
             if (empty($data)) {
@@ -445,7 +465,7 @@ class Order extends CI_Controller {
             }
         }
     }
-    
+
     public function ws_savePaymentDetails() {
         $content = json_decode(file_get_contents("php://input"));
         $_POST = (array) $content;
@@ -459,28 +479,27 @@ class Order extends CI_Controller {
             $errors = ltrim(explode('.', $errors)[0]);
             echo json_encode(array('status' => 'false', 'message' => $errors));
         } else {
-            if( strpos( $content->paymentId, 'paymentId=' ) !== false ) {
+            if (strpos($content->paymentId, 'paymentId=') !== false) {
                 $str = explode('paymentId=', $string);
-                if(!empty($str[1])) {
+                if (!empty($str[1])) {
                     $str = explode(":", $str[1]);
                     $content->paymentId = $str[0];
                 }
-            } 
-            $url = 'https://test.instamojo.com/api/1.1/payments/'. $content->paymentId;
+            }
+            $url = 'https://test.instamojo.com/api/1.1/payments/' . $content->paymentId;
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_HEADER, FALSE);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
-            curl_setopt($ch, CURLOPT_HTTPHEADER,
-                        array("X-Api-Key:test_9f9c491d610e76044e93a80253a",
-                            "X-Auth-Token:test_e4689a8b31f52210b2a759c8f13"));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array("X-Api-Key:test_9f9c491d610e76044e93a80253a",
+                "X-Auth-Token:test_e4689a8b31f52210b2a759c8f13"));
 
             $response = curl_exec($ch);
             curl_close($ch);
             $json_decode = json_decode($response, true);
             if ($json_decode['success']) {
-                $this->savePaymentDataToDB($content->orderId,$json_decode);
+                $this->savePaymentDataToDB($content->orderId, $json_decode);
                 writeOrderLog($content->orderId, $json_decode['payment']['payment_id'], $response);
                 echo json_encode(array('status' => 'true', 'message' => 'Payment Details Saved', 'Data' => $json_decode));
             } else {
@@ -488,8 +507,8 @@ class Order extends CI_Controller {
             }
         }
     }
-    
-    public function savePaymentDataToDB($order_id , $json_decode) {
+
+    public function savePaymentDataToDB($order_id, $json_decode) {
         $payment['order_id'] = $order_id;
         $payment['payment_id'] = $json_decode['payment']['payment_id'];
         $payment['imj_status'] = $json_decode['payment']['status'];
@@ -512,10 +531,10 @@ class Order extends CI_Controller {
         $payment['instrument_type'] = $json_decode['payment']['instrument_type'];
         $payment['failure'] = $json_decode['payment']['failure'];
         $payment['created_at'] = $json_decode['payment']['created_at'];
-        if($this->Order_model->check_exists('payment','payment_id',$payment['payment_id'])) {
-            $this->Order_model->insertRow('payment',$payment);
+        if ($this->Order_model->check_exists('payment', 'payment_id', $payment['payment_id'])) {
+            $this->Order_model->insertRow('payment', $payment);
         } else {
-            $this->Order_model->updateRow('payment','payment_id',$payment['payment_id'],$payment);
+            $this->Order_model->updateRow('payment', 'payment_id', $payment['payment_id'], $payment);
         }
     }
 
@@ -574,7 +593,7 @@ class Order extends CI_Controller {
         echo $response;
     }
 
-     /**
+    /**
      * This function is used for saving order quote from stores
      * @return String
      */
@@ -595,7 +614,7 @@ class Order extends CI_Controller {
             $data = $this->Order_model->getOrderdetails($content->order_id);
             if (!empty($data)) {
                 if ($data['order_status_name'] == 'Send Prescription' || $data['order_status_name'] == 'Get Quote') {
-                
+
                     $store = $this->Order_model->get_data_by('stores', $content->user_id, 'user_id');
                     $user = $this->Order_model->get_data_by('users', $content->user_id, 'user_id');
                     if (empty($store) || empty($user)) {
@@ -605,10 +624,9 @@ class Order extends CI_Controller {
                         $order_status = (!empty($result)) ? $result[0]->order_status_id : 3;
                         $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $store[0]->id, 'last_modified_by' => $content->user_id));
                         $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $store[0]->id, 'created_by' => $content->user_id));
-                        $this->sendNotification('', 'Order status updated', 'Order - '.$data['order_bill_id'], $data['user_id']);
+                        $this->sendNotification('', 'Order status updated', 'Order - ' . $data['order_bill_id'], $data['user_id']);
                         echo json_encode(array('status' => 'true', 'message' => 'Order Confirmed Successfully'));
                     }
-                    
                 } else {
                     echo json_encode(array('status' => 'false', 'message' => 'Order Confirmation failed'));
                 }
@@ -618,7 +636,7 @@ class Order extends CI_Controller {
         }
         exit;
     }
-    
+
     /**
      * This function is used for changing order status
      * @return String
@@ -630,7 +648,7 @@ class Order extends CI_Controller {
             [ 'field' => 'user_id', 'label' => 'User ID', 'rules' => 'required'],
             [ 'field' => 'order_id', 'label' => 'Order ID', 'rules' => 'required'],
             [ 'field' => 'status_id', 'label' => 'Status ID', 'rules' => 'required'],
-            //[ 'field' => 'store_id', 'label' => 'Store ID', 'rules' => 'required']
+                //[ 'field' => 'store_id', 'label' => 'Store ID', 'rules' => 'required']
         );
         $this->form_validation->set_rules($rules);
         if (!$this->form_validation->run()) {
@@ -640,7 +658,7 @@ class Order extends CI_Controller {
         } else {
             $order_data = $this->Order_model->getOrderdetails($content->order_id);
             if (!empty($order_data)) {
-                if($content->store_id) {
+                if ($content->store_id) {
                     $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
                     if (empty($store)) {
                         echo json_encode(array('status' => 'false', 'message' => 'Invalid Store Id'));
@@ -653,16 +671,16 @@ class Order extends CI_Controller {
                     echo json_encode(array('status' => 'false', 'message' => 'Invalid User or Status'));
                 } else {
                     $data = array('status' => $content->status_id, 'last_modified_by' => $content->user_id);
-                    if($content->store_id) {
+                    if ($content->store_id) {
                         $data['store_id'] = $content->store_id;
                     }
                     $this->Order_model->updateRow('order', 'id', $content->order_id, $data);
                     $data = array('order_id' => $content->order_id, 'order_status' => $content->status_id, 'created_by' => $content->user_id);
-                    if($content->store_id) {
+                    if ($content->store_id) {
                         $data['store_id'] = $content->store_id;
                     }
                     $this->Order_model->insertRow('order_history', $data);
-                    $this->sendNotification('', 'Order status updated', 'Order - '.$order_data['order_bill_id'], $order_data['user_id']);
+                    $this->sendNotification('', 'Order status updated', 'Order - ' . $order_data['order_bill_id'], $order_data['user_id']);
                     echo json_encode(array('status' => 'true', 'message' => 'Order Status Changed'));
                 }
             } else {
@@ -802,4 +820,3 @@ class Order extends CI_Controller {
     }
 
 }
-

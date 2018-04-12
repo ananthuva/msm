@@ -82,6 +82,26 @@ class Order_model extends SYS_Model {
         $query = $this->db->get();
         return $query->result_array();
     }
+    
+      /**
+     * This function is used to get order list 
+     */
+    public function getNewOrderList($store_id) {
+        $this->db->select('o.id,o.order_bill_id,s.name as store_name,o.note,o.status as order_status_id,os.order_status_name,CONCAT_WS(" ",u.name,u.lname) as user_name,'
+                . ' o.order_date,o.payment_type,o.payment_status,o.created_on,o.amount');
+        $this->db->from('order o');
+        $this->db->join('order_store_mapping osm', 'osm.order_id = o.id', 'left');
+        $this->db->join('table_order_status os', 'os.order_status_id = o.status', 'left');
+        $this->db->join('stores s', 's.id = o.store_id', 'left');
+        $this->db->join('users u', 'u.user_id = o.user_id', 'left');
+        $this->db->where('o.status',2);
+        $this->db->where('o.store_id',$store_id);
+        $this->db->or_where('osm.store_id', $store_id);
+        $this->db->group_by('o.id');
+        $this->db->order_by('o.created_on','DESC');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
 
     /**
      * This function is used to get order details 

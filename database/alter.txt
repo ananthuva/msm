@@ -155,3 +155,363 @@ CREATE TABLE `order_store_mapping` (
   `order_id` bigint(121) NOT NULL,
   `store_id` bigint(121) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+/*****************************************************************************************************************************************/
+
+/*
+SQLyog Ultimate - MySQL GUI v8.21 
+MySQL - 5.6.16-1~exp1 : Database - msm
+*********************************************************************
+*/
+
+
+/*!40101 SET NAMES utf8 */;
+
+/*!40101 SET SQL_MODE=''*/;
+
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+/*Table structure for table `attachment` */
+
+DROP TABLE IF EXISTS `attachment`;
+
+CREATE TABLE `attachment` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` varchar(60) NOT NULL,
+  `attachment` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `billing_address` */
+
+DROP TABLE IF EXISTS `billing_address`;
+
+CREATE TABLE `billing_address` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` int(10) NOT NULL,
+  `full_name` varchar(100) DEFAULT NULL,
+  `mobile` varchar(50) DEFAULT NULL,
+  `house_name` varchar(200) DEFAULT NULL,
+  `street` varchar(200) DEFAULT NULL,
+  `postoffice` char(100) DEFAULT NULL,
+  `pin` int(10) DEFAULT NULL,
+  `city` varchar(200) DEFAULT NULL,
+  `state` varchar(200) DEFAULT NULL,
+  `country` char(10) DEFAULT 'India',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `city` */
+
+DROP TABLE IF EXISTS `city`;
+
+CREATE TABLE `city` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `state_id` int(10) NOT NULL,
+  `name` char(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Table structure for table `country` */
+
+DROP TABLE IF EXISTS `country`;
+
+CREATE TABLE `country` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `Name` varchar(300) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `delivery_address` */
+
+DROP TABLE IF EXISTS `delivery_address`;
+
+CREATE TABLE `delivery_address` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` int(10) DEFAULT NULL,
+  `full_name` varchar(100) NOT NULL,
+  `mobile` varchar(50) NOT NULL,
+  `house_name` varchar(200) NOT NULL,
+  `street` varchar(200) NOT NULL,
+  `postoffice` char(100) DEFAULT NULL,
+  `pin` int(10) NOT NULL,
+  `city` varchar(200) DEFAULT NULL,
+  `state` varchar(200) NOT NULL,
+  `country` char(10) DEFAULT 'India',
+  `latitude` double DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `district` */
+
+DROP TABLE IF EXISTS `district`;
+
+CREATE TABLE `district` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `state_id` int(11) unsigned NOT NULL,
+  `name` varchar(300) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `order` */
+
+DROP TABLE IF EXISTS `order`;
+
+CREATE TABLE `order` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `order_bill_id` varchar(60) NOT NULL,
+  `store_id` int(10) DEFAULT NULL,
+  `note` text,
+  `status` int(10) DEFAULT '1',
+  `user_id` int(11) NOT NULL,
+  `order_date` date DEFAULT '0000-00-00',
+  `amount` float DEFAULT '0',
+  `payment_type` enum('COD','ONLINE') DEFAULT NULL,
+  `payment_status` char(60) DEFAULT NULL,
+  `created_on` datetime DEFAULT '0000-00-00 00:00:00',
+  `created_by` int(11) DEFAULT NULL,
+  `last_modified_by` int(11) DEFAULT NULL,
+  `last_modified_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `order_history` */
+
+DROP TABLE IF EXISTS `order_history`;
+
+CREATE TABLE `order_history` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` int(21) NOT NULL,
+  `store_id` int(21) DEFAULT NULL,
+  `order_status` int(10) DEFAULT NULL,
+  `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_by` int(21) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `order_store_mapping` */
+
+DROP TABLE IF EXISTS `order_store_mapping`;
+
+CREATE TABLE `order_store_mapping` (
+  `order_id` bigint(121) NOT NULL,
+  `store_id` bigint(121) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*Table structure for table `payment` */
+
+DROP TABLE IF EXISTS `payment`;
+
+CREATE TABLE `payment` (
+  `id` bigint(121) NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(121) NOT NULL,
+  `payment_id` varchar(255) DEFAULT NULL,
+  `imj_status` char(100) DEFAULT NULL,
+  `payment_status` varchar(300) DEFAULT NULL,
+  `currency` char(20) DEFAULT NULL,
+  `amount` decimal(15,2) DEFAULT NULL,
+  `buyer_name` varchar(300) DEFAULT NULL,
+  `buyer_phone` varchar(50) DEFAULT NULL,
+  `buyer_email` varchar(300) DEFAULT NULL,
+  `shipping_address` text,
+  `shipping_city` varchar(300) DEFAULT NULL,
+  `shipping_state` varchar(300) DEFAULT NULL,
+  `shipping_zip` varchar(20) DEFAULT NULL,
+  `shipping_country` varchar(300) DEFAULT NULL,
+  `quantity` int(121) DEFAULT NULL,
+  `unit_price` decimal(15,2) DEFAULT NULL,
+  `fees` decimal(15,2) DEFAULT NULL,
+  `affiliate_commission` decimal(15,2) DEFAULT NULL,
+  `payment_request` text,
+  `instrument_type` char(50) DEFAULT NULL,
+  `failure` varchar(300) DEFAULT NULL,
+  `created_at` varchar(300) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+/*Table structure for table `permission` */
+
+DROP TABLE IF EXISTS `permission`;
+
+CREATE TABLE `permission` (
+  `id` int(122) unsigned NOT NULL AUTO_INCREMENT,
+  `user_type` varchar(250) DEFAULT NULL,
+  `data` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+/*Table structure for table `setting` */
+
+DROP TABLE IF EXISTS `setting`;
+
+CREATE TABLE `setting` (
+  `id` int(122) unsigned NOT NULL AUTO_INCREMENT,
+  `keys` varchar(255) DEFAULT NULL,
+  `value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+
+/*Table structure for table `state` */
+
+DROP TABLE IF EXISTS `state`;
+
+CREATE TABLE `state` (
+  `id` int(121) unsigned NOT NULL AUTO_INCREMENT,
+  `country_id` int(10) DEFAULT '1',
+  `name` char(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `stores` */
+
+DROP TABLE IF EXISTS `stores`;
+
+CREATE TABLE `stores` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) NOT NULL,
+  `address` text,
+  `license_no` varchar(100) DEFAULT NULL,
+  `poc` varchar(50) DEFAULT NULL,
+  `agreement` text,
+  `user_id` int(10) NOT NULL,
+  `city_id` int(10) DEFAULT NULL,
+  `district_id` int(10) DEFAULT NULL,
+  `state_id` int(10) DEFAULT NULL,
+  `latitude` double DEFAULT NULL,
+  `longitude` double DEFAULT NULL,
+  `postal` varchar(10) DEFAULT NULL,
+  `contact_number_1` varchar(20) DEFAULT NULL,
+  `contact_number_2` varchar(20) DEFAULT NULL,
+  `contact_number_3` varchar(20) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `is_deleted` tinyint(1) DEFAULT '0',
+  `created_by` int(11) DEFAULT NULL,
+  `last_modified_by` int(11) DEFAULT NULL,
+  `created_on` datetime DEFAULT '0000-00-00 00:00:00',
+  `last_modified_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `support_ticke_message` */
+
+DROP TABLE IF EXISTS `support_ticke_message`;
+
+CREATE TABLE `support_ticke_message` (
+  `ticket_message_id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_id` bigint(121) NOT NULL,
+  `content` text NOT NULL,
+  `read_status` tinyint(1) NOT NULL DEFAULT '0',
+  `reply_to` int(21) NOT NULL DEFAULT '0',
+  `created_by` int(21) NOT NULL,
+  `created_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ticket_message_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/*Table structure for table `support_ticket` */
+
+DROP TABLE IF EXISTS `support_ticket`;
+
+CREATE TABLE `support_ticket` (
+  `ticket_id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_number` varchar(60) NOT NULL,
+  `subject` text NOT NULL,
+  `description` text,
+  `created_by` int(21) DEFAULT NULL,
+  `created_on` datetime DEFAULT '0000-00-00 00:00:00',
+  `read_status` tinyint(1) DEFAULT '0',
+  `status` enum('open','closed','hold') DEFAULT 'open',
+  `priority` enum('low','high','medium') DEFAULT 'low',
+  `closed_by` int(21) DEFAULT NULL,
+  `closed_on` datetime DEFAULT NULL,
+  PRIMARY KEY (`ticket_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `table_order_status` */
+
+DROP TABLE IF EXISTS `table_order_status`;
+
+CREATE TABLE `table_order_status` (
+  `order_status_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `order_status_name` char(100) DEFAULT NULL,
+  PRIMARY KEY (`order_status_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `templates` */
+
+DROP TABLE IF EXISTS `templates`;
+
+CREATE TABLE `templates` (
+  `id` int(121) unsigned NOT NULL AUTO_INCREMENT,
+  `module` varchar(255) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
+  `template_name` varchar(255) DEFAULT NULL,
+  `html` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+
+/*Table structure for table `user_shipping_address` */
+
+DROP TABLE IF EXISTS `user_shipping_address`;
+
+CREATE TABLE `user_shipping_address` (
+  `id` bigint(121) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(121) NOT NULL,
+  `full_name` varchar(100) DEFAULT NULL,
+  `mobile` varchar(20) DEFAULT NULL,
+  `house_name` text,
+  `street` text,
+  `postoffice` varchar(200) DEFAULT NULL,
+  `pin` decimal(50,0) DEFAULT NULL,
+  `city` varchar(200) DEFAULT NULL,
+  `state` varchar(200) DEFAULT NULL,
+  `created_by` int(11) DEFAULT NULL,
+  `created_on` datetime DEFAULT '0000-00-00 00:00:00',
+  `last_modified_by` int(11) DEFAULT NULL,
+  `last_modified_on` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+/*Table structure for table `users` */
+
+DROP TABLE IF EXISTS `users`;
+
+CREATE TABLE `users` (
+  `user_id` bigint(121) NOT NULL AUTO_INCREMENT,
+  `var_key` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `is_deleted` varchar(255) DEFAULT '0',
+  `name` varchar(255) DEFAULT NULL,
+  `lname` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `mobile_no` varchar(255) DEFAULT NULL,
+  `phone_no` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `dob` date DEFAULT NULL,
+  `address` text,
+  `profile_pic` varchar(255) DEFAULT NULL,
+  `user_type` enum('admin','member','pharmacist') DEFAULT NULL,
+  `is_registered` tinyint(1) DEFAULT '0',
+  `is_purchased` tinyint(1) DEFAULT '0',
+  `purchase_count` int(121) DEFAULT NULL,
+  `last_purchased_on` datetime DEFAULT NULL,
+  `firebase_reg_id` varchar(255) DEFAULT NULL,
+  `hash` varchar(255) DEFAULT NULL,
+  `var_otp` int(4) DEFAULT NULL,
+  `is_verified` tinyint(1) NOT NULL DEFAULT '0',
+  `created_by` int(11) DEFAULT NULL,
+  `last_modified_by` int(11) DEFAULT NULL,
+  `created_on` datetime DEFAULT NULL,
+  `last_modified_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+/**************************************************************************************************/
+
