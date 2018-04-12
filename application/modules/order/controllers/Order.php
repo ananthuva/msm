@@ -187,6 +187,7 @@ class Order extends CI_Controller {
                     $this->Order_model->updateTableRow('order', $update, $where);
                     $this->Order_model->insertRow('order_history', array('order_id' => $order_id, 'order_status' => 2, 'store_id' => '', 'created_by' => $order['user_id']));
                     foreach($stores as $store) {
+                         $this->Order_model->insertRow('order_store_mapping', array('order_id' => $order_id, 'store_id' => $store['id']));
                         if(!empty($store['user_id'])) {
                             $this->sendNotification('', 'There is a new order request.', 'Order '. $order['order_bill_id'], $store['user_id']);
                         }

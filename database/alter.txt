@@ -150,3 +150,8 @@ ALTER TABLE `billing_address`     CHANGE `full_name` `full_name` VARCHAR(100) CH
 ALTER TABLE `billing_address`  ADD COLUMN `city` VARCHAR(200) NULL AFTER `pin`;
 ALTER TABLE `delivery_address`  ADD COLUMN `city` VARCHAR(200) NULL AFTER `pin`;
 ALTER TABLE `user_shipping_address`  ADD COLUMN `city` VARCHAR(200) NULL AFTER `pin`;
+
+CREATE TABLE `order_store_mapping` (
+  `order_id` bigint(121) NOT NULL,
+  `store_id` bigint(121) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
