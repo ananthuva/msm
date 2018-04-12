@@ -383,7 +383,7 @@
     
     function push_notification($regIDs = array(),$body = NULL, $title = NULL){
         // API access key from Google FCM App Console
-        define('API_ACCESS_KEY', 'AIzaSyDeCvJUnS54aC3vZGm5B5UUJeIhG71EVgQ');
+        $API_ACCESS_KEY = 'AIzaSyDeCvJUnS54aC3vZGm5B5UUJeIhG71EVgQ';
 
         // generated via the cordova phonegap-plugin-push using "senderID" (found in FCM App Console)
         // this was generated from my phone and outputted via a console.log() in the function that calls the plugin
@@ -413,7 +413,7 @@
         );
 
         $headers = array(
-            'Authorization: key=' . API_ACCESS_KEY,
+            'Authorization: key=' . $API_ACCESS_KEY,
             'Content-Type: application/json'
         );
 
