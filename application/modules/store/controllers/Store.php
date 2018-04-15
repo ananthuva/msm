@@ -483,5 +483,23 @@ class Store extends CI_Controller {
     }]';*/
         exit;
     }
+    
+    public function getStores($id = '') {
+        $q = $_REQUEST['q'];
+        $country_codes = $this->Store_model->getStoreList($_REQUEST);
+
+        $jsonData = array();
+        $i = 0;
+        foreach ($country_codes as $value) {
+            if($value->id != $id) {
+                $jsonData[$i]['id'] = $value->id;
+                $jsonData[$i]['name'] = $value->name;
+                $i++;
+            }    
+        }
+        $country_codes_count = count($jsonData);
+        echo json_encode(array('results' => $jsonData, 'total' => $country_codes_count));
+        exit;
+    }
 
 }

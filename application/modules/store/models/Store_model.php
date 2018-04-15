@@ -8,12 +8,12 @@ class Store_model extends SYS_Model {
     /**
       * This function is used to get stores by latitude and longitude
       */
-    function getNearbyStores() {
+    function getNearbyStores($dist = '') {
         $latitude = ($this->input->post('latitude')) ? (double)$this->input->post('latitude') : 0;
         $longitude = ($this->input->post('longitude')) ? (double)$this->input->post('longitude') : 0;
         $query = 'SELECT id, name , user_id, latitude, longitude,(6371 * ACOS(COS(RADIANS('.$latitude.')) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS('.$longitude.')) +
             SIN( RADIANS('.$latitude.') ) * SIN( RADIANS(latitude) ))) AS distance 
-            FROM stores HAVING distance < 5 ORDER BY distance LIMIT 0 , 20';
+            FROM stores HAVING distance < '.($dist) ? $dist : 5 .' ORDER BY distance LIMIT 0 , 20';
         return $result = $this->db->query($query)->result_array();
     }
 
@@ -134,6 +134,31 @@ class Store_model extends SYS_Model {
         $this->db->from($tableName);
         $query = $this->db->get();
         return $query->result();
+    }
+    
+        /**
+     * Function to get store list
+     * @param type $friendly_url
+     * @return type array
+     */
+    function getStoreList($data) {
+
+        $keyword = $data['q'];
+        $keyword = explode('(', $keyword);
+        $keyword = trim($keyword[0]);
+
+        $limit = $data['s'];
+        $offset = ($data['p'] > 1) ? (($data['p'] - 1) * $data['s']) : 0;
+        $this->db->select('id, name');
+        $this->db->from('stores');
+        if (!empty($keyword)) {
+            $this->db->or_where("name LIKE '$keyword%'");
+        }
+        $this->db->where('user_id is NOT NULL', NULL, FALSE);
+        $this->db->limit($limit, $offset);
+        $qry = $this->db->get();
+        $result = $qry->result();
+        return $result;
     }
 
 }
