@@ -174,7 +174,7 @@ class Order extends CI_Controller {
 
                 $stores = $this->store_model->getNearbyStores();
                 if (empty($stores)) { //send notification to all stores
-                    $this->sendNotification('pharmacist', 'There is a new order request.', 'Order ' . $order['order_bill_id']);
+                    $this->sendNotification('admin', 'There is a new order request.', 'Order ' . $order['order_bill_id']);
                 } else if (count($stores) == 1) { //send notification to assigned store
                     $update = array('store_id' => $stores[0]['id'], 'status' => 2);
                     $where = array('id' => $order_id);
@@ -623,6 +623,7 @@ class Order extends CI_Controller {
                         $result = $this->Order_model->get_data_by('table_order_status', 'Confirmed Order', 'order_status_name');
                         $order_status = (!empty($result)) ? $result[0]->order_status_id : 3;
                         $this->Order_model->updateRow('order', 'id', $content->order_id, array('amount' => $content->amount, 'status' => $order_status, 'store_id' => $store[0]->id, 'last_modified_by' => $content->user_id));
+                        $this->Order_model->remove('order_store_mapping', array( 'order_id' => $content->order_id));
                         $this->Order_model->insertRow('order_history', array('order_id' => $content->order_id, 'order_status' => $order_status, 'store_id' => $store[0]->id, 'created_by' => $content->user_id));
                         $this->sendNotification('', 'Order status updated', 'Order - ' . $data['order_bill_id'], $data['user_id']);
                         echo json_encode(array('status' => 'true', 'message' => 'Order Confirmed Successfully'));
@@ -759,6 +760,31 @@ class Order extends CI_Controller {
         }
 
         echo json_encode($output_arr);
+    }
+    
+    public function changeStore() {
+        if(isset($_POST['store_id']) && isset($_POST['order_id'])) {
+            $order =  $this->Order_model->get_data_by('order', $_POST['order_id'], 'id');
+            $update = array('store_id' => $_POST['store_id']);
+            if($order[0]->status < 5) {
+                $update['status'] = 2;
+            }
+            $where = array('id' => $_POST['order_id']);
+            $this->Order_model->updateTableRow('order', $update, $where);
+            $insert = array('order_id' => $_POST['order_id'], 'store_id' => $_POST['store_id'], 'created_by' => $this->user_id);
+            if($order[0]->status < 5) {
+                $insert['order_status'] = 2;
+            }
+            $this->Order_model->insertRow('order_history', $insert);
+            $store =  $this->Order_model->get_data_by('stores', $_POST['store_id'], 'id');
+            if (!empty($store[0]->user_id)) {
+                $this->sendNotification('', 'There is a new order request.', 'Order ' . $order[0]->order_bill_id, $store[0]->user_id);
+            }
+            echo 'true';
+        } else {
+            echo 'false';
+        }
+        exit;
     }
 
     /**

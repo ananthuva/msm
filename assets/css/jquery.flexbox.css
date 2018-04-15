@@ -1,0 +1,111 @@
+﻿
+
+.text.input {
+  z-index: 0;
+}
+/* Drop-down arrow, with sprited image */
+.ffb-arrow {
+  background-image: url("../images/sel_win7.gif");
+  border: 0 none !important;
+  float: right;
+  height: 22px;
+  outline: 0 none !important;
+  position: relative;
+  right: 3px;
+  top: -27px;
+  width: 17px;
+  z-index: 9999 !important;
+}
+.ffb-arrow.out { /* css sprite technique */
+    background-position:0;
+}
+.ffb-arrow.over { /* css sprite technique */
+    background-position:-17px 0;
+}
+.ffb-arrow.active { /* css sprite technique */
+    background-position:-34px 0;
+}
+.ffb-no-results 
+{
+    padding:1px;
+    color:#888;
+    font-style:italic;
+    border-bottom:none;
+}
+/* Container for dropdown contents */
+.ffb {
+  top: 35px !important;
+  background-color: #ffffff;
+  border-left: 1px solid #d5d5d5;
+  border-right: 1px solid #d5d5d5;
+  border-bottom: 1px solid #d5d5d5;
+  color: #8c8c8c !important;
+  font-size: 12px;
+  height: auto;
+  margin-top: -4px;
+  max-height: 210px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  padding-top: 2px;
+  position: absolute;
+  width: 100% !important;
+  z-index:9998 !important;
+}
+/* Inner div for dropdown */
+.ffb .content {
+  border-bottom: 1px solid #d5d5d5;
+  color: #000;
+  overflow: auto;
+  min-height: auto !important;
+  padding: 0px 15px 0px 15px !important;
+}
+
+.ffb .content .row {
+  border-bottom: 1px solid #d5d5d5;
+  clear: both;
+  color: #757575;
+  font-size: 12px;
+  height: 20px;
+  line-height: 10px;
+  padding-bottom: 17px;
+  padding-left: 10px;
+  padding-top: 5px;
+}
+.ffb .content .row:last-child {
+  border-bottom: none;
+}
+.ffb-sel {
+    cursor:pointer;
+    cursor:hand;
+    color:#fff !important;
+    background-color:#00c0ef;
+}
+.ffb-match {
+    font-weight:bold;
+    color:#000;
+}
+
+/*#drug_name_ctr {
+  bottom: 27px !important;
+}*/
+
+/* Paging */
+.ffb .paging {
+    vertical-align:middle;
+    border-bottom:1px solid #828790;
+}
+.ffb .page, .ffb a.page {
+  background-color: #fff !important;
+  border: 1px solid #0bb8c1 !important;
+  color: #545454 !important;
+  font-size: 85% !important;
+  margin: 2px 3px 6px 2px !important;
+  padding: 3px !important;
+}
+.ffb .box {
+    width:22px;
+    margin:2px;
+}
+.ffb .summary {
+    font-size:85%;
+}

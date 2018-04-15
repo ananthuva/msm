@@ -33,6 +33,27 @@
                             <label>: <?php echo isset($order['store_name']) ? $order['store_name'] : ''; ?></label>
                         </div>
                     </div>
+                    <div class="col-md-12">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6"> 
+                            <div id="editButtons">
+                                <?php if ($order['store_name'] == '') { ?>
+                                <button type="button" id="storeAdd" class="btn store-edit btn-success">Assign Store</button>
+                                <?php } else if ($order['order_status_id'] < 6) { ?>
+                                <button type="button" id="storeEdit" class="btn store-edit btn-success">Change Store</button>
+                                <?php } ?>
+                            </div>
+                            <div id="editInput" class="hidden">
+                                <div class="col-xs-6 w-48">
+                                    <div id="stores"></div> 
+                                </div>
+                                <div class="col-xs-6 w-48">
+                                    <button type="button" id="storeEditSave" class="btn store-edit-action btn-success">Save</button>
+                                    <button type="button" id="storeEditCancel" class="btn store-edit-action btn-warning">Cancel</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
                     <div class="col-md-6">
                         <div class="col-xs-6 w-48">
                             <label>User Name</label>
@@ -275,9 +296,45 @@
 <!-- /.content-wrapper -->
 <script>
     $(document).ready(function () {
+        $('.store-edit').on('click', function() {
+            $('#editButtons,#editInput').toggleClass('hidden');
+        });
+        $('.store-edit-action').on('click', function() {
+            $('#editButtons,#editInput').toggleClass('hidden');
+            if($(this).attr('id') == "storeEditCancel") {
+                $('#stores_input').val('');
+            } else {
+                $.ajax({
+                    url: '<?php echo base_url('order/changeStore'); ?>',
+                    type: 'POST',
+                    data: "store_id=" + $("#stores_hidden").val() + "&order_id=<?php echo $order['id']; ?>",
+                    success: function(data) {
+                        if(data == 'true') {
+                            location.reload();
+                        }
+                    }
+                });
+            }
+        });
+        $("#stores").flexbox('<?php echo base_url(); ?>store/getStores/<?php echo $order['store_id']; ?>', {
+            allowInput: true,
+            inputClass: 'xxwide text input stores-input',
+            allowInputClick: false,
+            width: null,
+//            paging: {
+//                style: 'links', // or 'links'
+//                cssClass: 'paging', // prefix with containerClass (e.g. .ffb .paging)
+//                pageSize: 5 // acts as a threshold.
+//            }
+//            onSelect: function () {
+//                var sel_store = $("#stores_hidden").val();
+//            }
+        });
     });
 
 </script>
+<script src="<?php echo base_url('assets/js/jquery.flexbox.js'); ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo base_url('assets/css/jquery.flexbox.css'); ?>" />
 <style>
     .bs-wizard {margin-top: 40px;}
 
@@ -300,6 +357,8 @@
     .bs-wizard > .bs-wizard-step:first-child  > .progress {left: 50%; width: 50%;}
     .bs-wizard > .bs-wizard-step:last-child  > .progress {width: 50%;}
     .bs-wizard > .bs-wizard-step.disabled a.bs-wizard-dot{ pointer-events: none; }
+    .store-edit { margin-bottom: 15px; }
+    .stores-input { width: 100%; }
     @media print {
         .section-hidden, .section-hidden * {
             visibility: hidden;
