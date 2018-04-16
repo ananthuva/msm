@@ -320,6 +320,7 @@
             allowInput: true,
             inputClass: 'xxwide text input stores-input',
             allowInputClick: false,
+            method: 'POST',
             width: null,
 //            paging: {
 //                style: 'links', // or 'links'
