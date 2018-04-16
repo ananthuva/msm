@@ -659,28 +659,40 @@ class Order extends CI_Controller {
         } else {
             $order_data = $this->Order_model->getOrderdetails($content->order_id);
             if (!empty($order_data)) {
-                if ($content->store_id) {
-                    $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
-                    if (empty($store)) {
-                        echo json_encode(array('status' => 'false', 'message' => 'Invalid Store Id'));
-                        exit;
-                    }
-                }
                 $user = $this->Order_model->get_data_by('users', $content->user_id, 'user_id');
                 $status = $this->Order_model->get_data_by('table_order_status', $content->status_id, 'order_status_id');
                 if (empty($user) || empty($status)) {
                     echo json_encode(array('status' => 'false', 'message' => 'Invalid User or Status'));
                 } else {
-                    $data = array('status' => $content->status_id, 'last_modified_by' => $content->user_id);
                     if ($content->store_id) {
-                        $data['store_id'] = $content->store_id;
+                        $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
+                    } else {
+                        $store = $this->Order_model->get_data_by('stores', $content->user_id, 'user_id');
+                    }
+                    if (empty($store)) {
+                        echo json_encode(array('status' => 'false', 'message' => 'Invalid Store Id'));
+                        exit;
+                    }
+                    if($content->status_id == 4) { //reject
+                        $this->Order_model->remove('order_store_mapping', array( 'order_id' => $content->order_id, 'store_id' => $store[0]->id));
+                        $store_mapping = $this->Order_model->get_data_by('order_store_mapping', $content->order_id, 'order_id');
+                        if($order_data['store_id'] == $store[0]->id) {
+                            $data = array('status' => $content->status_id, 'last_modified_by' => $content->user_id);
+                            $data['store_id'] = $store[0]->id;
+                        } else if(empty($store_mapping)) {
+                            $data = array('status' => 1, 'last_modified_by' => $content->user_id);
+                            $data['store_id'] = $store[0]->id;
+                        } else {
+                            $data = array('status' => $order_data['status'], 'last_modified_by' => $content->user_id);
+                        }
+                    } else {
+                        $data = array('status' => $content->status_id, 'last_modified_by' => $content->user_id);
+                        $data['store_id'] = $store[0]->id;
                     }
                     $this->Order_model->updateRow('order', 'id', $content->order_id, $data);
-                    $data = array('order_id' => $content->order_id, 'order_status' => $content->status_id, 'created_by' => $content->user_id);
-                    if ($content->store_id) {
-                        $data['store_id'] = $content->store_id;
-                    }
-                    $this->Order_model->insertRow('order_history', $data);
+                    $history = array('order_id' => $content->order_id, 'order_status' => $data['status'], 'created_by' => $content->user_id);
+                    $history['store_id'] = $store[0]->id;
+                    $this->Order_model->insertRow('order_history', $history);
                     $this->sendNotification('', 'Order status updated', 'Order - ' . $order_data['order_bill_id'], $order_data['user_id']);
                     echo json_encode(array('status' => 'true', 'message' => 'Order Status Changed'));
                 }
