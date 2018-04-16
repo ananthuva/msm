@@ -39,7 +39,7 @@
                             <div id="editButtons">
                                 <?php if ($order['store_name'] == '') { ?>
                                 <button type="button" id="storeAdd" class="btn store-edit btn-success">Assign Store</button>
-                                <?php } else if ($order['order_status_id'] < 6) { ?>
+                                <?php } else if ($order['order_status_id'] < 5) { ?>
                                 <button type="button" id="storeEdit" class="btn store-edit btn-success">Change Store</button>
                                 <?php } ?>
                             </div>
