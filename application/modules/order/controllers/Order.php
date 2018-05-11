@@ -534,7 +534,7 @@ class Order extends CI_Controller {
         if ($json_decode['payment']['status'] == "Credit") {
             $order_data = $this->Order_model->getOrderdetails($order_id);
             $this->Order_model->updateRow('order', 'id', $order_id, array('status' => 5, 'last_modified_by' => $this->user_id));
-            $this->Order_model->insertRow('order_history', array('order_id' => $order_id, 'order_status' => 5, 'store_id' => $order_data['status'], 'created_by' => $this->user_id));
+            $this->Order_model->insertRow('order_history', array('order_id' => $order_id, 'order_status' => 5, 'store_id' => $order_data['store_id'], 'created_by' => $this->user_id));
         }
         if ($this->Order_model->check_exists('payment', 'payment_id', $payment['payment_id'])) {
             $this->Order_model->insertRow('payment', $payment);
@@ -863,3 +863,4 @@ class Order extends CI_Controller {
     }
 
 }
+
