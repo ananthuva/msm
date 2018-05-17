@@ -669,7 +669,7 @@ class Order extends CI_Controller {
                 if (empty($user) || empty($status)) {
                     echo json_encode(array('status' => 'false', 'message' => 'Invalid User or Status'));
                 } else {
-                    if ($content->store_id) {
+                    if (!empty($content->store_id)) {
                         $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
                     } else {
                         $store = $this->Order_model->get_data_by('stores', $content->user_id, 'user_id');
