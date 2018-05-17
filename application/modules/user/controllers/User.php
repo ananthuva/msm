@@ -75,6 +75,8 @@ class User extends CI_Controller {
                     if(!empty($firebase_reg_id)){
                         $this->User_model->updateRow('users', 'user_id', $UserData['user_id'], array('firebase_reg_id' => $firebase_reg_id));
                     }
+		  			$store = $this->User_model->get_data_by('stores',$UserData["user_id"],'user_id');
+                    $UserData['store_id'] = !empty($store[0]->id) ? $store[0]->id : 0;
                     unset($UserData['password']);
                     unset($UserData['var_key']);
                     unset($UserData['is_deleted']);
