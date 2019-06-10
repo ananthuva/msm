@@ -669,7 +669,11 @@ class Order extends CI_Controller {
                 if (empty($user) || empty($status)) {
                     echo json_encode(array('status' => 'false', 'message' => 'Invalid User or Status'));
                 } else {
+<<<<<<< HEAD
                     if ($content->store_id) {
+=======
+                    if (!empty($content->store_id)) {
+>>>>>>> 677dca0e9b3a30ffd074d771d9eca11392c67a81
                         $store = $this->Order_model->get_data_by('stores', $content->store_id, 'id');
                     } else {
                         $store = $this->Order_model->get_data_by('stores', $content->user_id, 'user_id');
@@ -694,6 +698,7 @@ class Order extends CI_Controller {
                         $data = array('status' => $content->status_id, 'last_modified_by' => $content->user_id);
                         $data['store_id'] = $store[0]->id;
                     }
+
                     $this->Order_model->updateRow('order', 'id', $content->order_id, $data);
                     $history = array('order_id' => $content->order_id, 'order_status' => $data['status'], 'created_by' => $content->user_id);
                     $history['store_id'] = $store[0]->id;
